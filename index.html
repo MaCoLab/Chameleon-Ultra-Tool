@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChameleonUltra - Microel Manager BLE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #0a0e27;
+            --card-bg: #1a1f35;
+            --accent-color: #00ff9d;
+            --accent-glow: rgba(0, 255, 157, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #8e9299;
+            --error-color: #ff4444;
+            --warning-color: #f27d26;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(to bottom, #0d1231, var(--bg-color));
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--error-color);
+            box-shadow: 0 0 5px var(--error-color);
+            transition: all 0.3s ease;
+        }
+
+        .led.connected {
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--accent-color);
+            background: transparent;
+            color: var(--accent-color);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            outline: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1rem;
+        }
+
+        .btn-danger {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--error-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        /* Grid Layout */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 255, 157, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Info Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .info-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-table td:first-child {
+            color: var(--text-secondary);
+            width: 40%;
+        }
+
+        .info-table td:last-child {
+            text-align: right;
+            color: var(--accent-color);
+        }
+
+        /* Recharge Selector */
+        .recharge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .recharge-option, .recharge-option-comestero {
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .recharge-option:hover, .recharge-option-comestero:hover {
+            border-color: rgba(0, 255, 157, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .recharge-option.active, .recharge-option-comestero.active {
+            border-color: var(--accent-color);
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* Log Area */
+        .log-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #terminal {
+            background-color: #050714;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #d1d1d1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .log-entry {
+            border-left: 2px solid transparent;
+            padding-left: 0.5rem;
+        }
+
+        .log-info { border-left-color: var(--accent-color); }
+        .log-error { border-left-color: var(--error-color); color: var(--error-color); }
+        .log-warn { border-left-color: var(--warning-color); color: var(--warning-color); }
+        .log-hex { color: var(--accent-color); }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Overlay for "Avvicina carta" */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .overlay-content {
+            max-width: 400px;
+        }
+
+        .nfc-animation {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--accent-color);
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 255, 157, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            text-align: center;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background: #050714;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: white;
+            font-family: var(--font-mono);
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            outline: none;
+        }
+
+        .login-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .login-logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .login-logo span {
+            color: var(--accent-color);
+        }
+
+        #main-app {
+            display: none;
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .dash-btn {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            gap: 1rem;
+        }
+
+        .dash-btn:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-glow);
+            color: var(--accent-color);
+        }
+
+        .dash-btn .icon {
+            font-size: 3rem;
+        }
+
+        .dash-btn .label {
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-bar {
+            max-width: 1200px;
+            margin: 1rem auto 0;
+            padding: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <div class="login-logo">MACO <span>LAB.</span></div>
+            <div class="nfc-animation" style="margin-bottom: 1.5rem; width: 60px; height: 60px;"></div>
+            <h2 style="margin-bottom: 1.5rem; color: var(--accent-color); font-size: 1rem; opacity: 0.8;">ACCESSO RISERVATO</h2>
+            <input type="password" id="login-pass" class="login-input" placeholder="PASSWORD">
+            <button id="btn-login" class="btn btn-large">ENTRA</button>
+            <div id="login-error" style="color: var(--error-color); margin-top: 1rem; font-size: 0.8rem; display: none;">Password errata!</div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page active">
+            <header>
+                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.2rem;">MACO <span>LAB.</span></div>
+                <div style="font-size: 0.7rem; color: var(--accent-color); letter-spacing: 0.3em; margin-bottom: 1rem; opacity: 0.8; font-weight: 700;">CHAMELEON ULTRA TOOL</div>
+                <h1>Seleziona Tipologia Tag</h1>
+                <div class="status-bar">
+                    <div id="connection-led" class="led"></div>
+                    <span id="connection-status" class="status-text">DISCONNESSO</span>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 1rem;">
+                    <button id="btn-connect" class="btn">🔵 Connetti Chameleon (BLE)</button>
+                    <button id="btn-disconnect" class="btn btn-danger" style="display: none;">Disconnetti</button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="dash-btn" onclick="showPage('page-microel')">
+                    <div class="icon">💳</div>
+                    <div class="label">Microel</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-comestero')">
+                    <div class="icon">💳</div>
+                    <div class="label">Comestero</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-trea')">
+                    <div class="icon">💳</div>
+                    <div class="label">Trea</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-mizip')">
+                    <div class="icon">🔑</div>
+                    <div class="label">MiZip</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-ybb')">
+                    <div class="icon">🔑</div>
+                    <div class="label">YBB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MICROEL PAGE -->
+        <div id="page-microel" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Microel Manager</h1>
+                <div id="device-info" class="status-text" style="margin-bottom: 1rem; display: none;">
+                    Dispositivo: <span id="device-name" style="color: var(--accent-color)">-</span> | 
+                    Firmware: <span id="fw-version" style="color: var(--accent-color)">-</span>
+                </div>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid">-</td></tr>
+                            <tr><td>KeyA Generata</td><td id="res-keya">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit">-</td></tr>
+                            <tr><td>Credito Prec.</td><td id="res-prev-credit">-</td></tr>
+                            <tr><td>Checksum</td><td id="res-checksum">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA</div>
+                    <div class="recharge-grid">
+                        <div class="recharge-option active" data-amount="5">5€</div>
+                        <div class="recharge-option" data-amount="10">10€</div>
+                        <div class="recharge-option" data-amount="20">20€</div>
+                        <div class="recharge-option" data-amount="30">30€</div>
+                        <div class="recharge-option" data-amount="50">50€</div>
+                    </div>
+                    <button id="btn-recharge" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMESTERO PAGE -->
+        <div id="page-comestero" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Comestero Manager</h1>
+            </header>
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info-comestero" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results-comestero" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid-comestero">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit-comestero">-</td></tr>
+                            <tr><td>Credito Prec.</td><td id="res-prev-credit-comestero">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA</div>
+                    <div class="recharge-grid">
+                        <div class="recharge-option-comestero active" data-amount="500">5€</div>
+                        <div class="recharge-option-comestero" data-amount="1000">10€</div>
+                        <div class="recharge-option-comestero" data-amount="2000">20€</div>
+                        <div class="recharge-option-comestero" data-amount="5000">50€</div>
+                    </div>
+                    <button id="btn-recharge-comestero" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset-comestero" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+
+                <!-- CARD 4: GOD MODE -->
+                <div class="card">
+                    <div class="card-title">⚡ GOD MODE</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-god-activate" class="btn btn-large" disabled>ATTIVA</button>
+                        <button id="btn-god-deactivate" class="btn btn-large btn-danger" disabled>TOGLI</button>
+                    </div>
+                </div>
+
+                <!-- CARD 5: AGGIUNGI NUOVA CARTA -->
+                <div class="card">
+                    <div class="card-title">➕ AGGIUNGI NUOVA CARTA</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="input-group">
+                            <label class="input-label">Nome (es. PERSONALE)</label>
+                            <input type="text" id="new-comestero-name" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="Nome identificativo">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">UID (es. F34883EC)</label>
+                            <input type="text" id="new-comestero-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Key0 (es. 4AF6F3C140CD)</label>
+                            <input type="text" id="new-comestero-key0" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">KeyUid (es. 48C4ECD2337D)</label>
+                            <input type="text" id="new-comestero-keyuid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <button id="btn-add-comestero-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
+                    </div>
+                    <div id="user-comestero-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Lista carte aggiunte -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TREA PAGE (Placeholder) -->
+        <div id="page-trea" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Trea Manager</h1>
+                <div id="trea-device-info" class="status-text" style="margin-bottom: 1rem; display: none;">
+                    Dispositivo: <span id="trea-device-name" style="color: var(--accent-color)">-</span>
+                </div>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info-trea" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results-trea" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid-trea">-</td></tr>
+                            <tr><td>Tipo Carta</td><td id="res-type-trea">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit-trea">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA (55€)</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Carica l'importo fisso di 55.00€.</p>
+                    <button id="btn-recharge-trea" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset-trea" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+
+                <!-- CARD 4: AGGIUNGI NUOVA CARTA -->
+                <div class="card">
+                    <div class="card-title">➕ AGGIUNGI NUOVA CARTA</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="input-group">
+                            <label class="input-label">Nome (es. PERSONALE)</label>
+                            <input type="text" id="new-trea-name" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="Nome identificativo">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">UID (es. D7A2DD6E)</label>
+                            <input type="text" id="new-trea-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Key6 (es. 26F330C35759)</label>
+                            <input type="text" id="new-trea-key6" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <button id="btn-add-trea-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
+                    </div>
+                    <div id="user-trea-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Lista carte aggiunte -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIZIP PAGE -->
+        <div id="page-mizip" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>MiZip Manager</h1>
+            </header>
+            <div class="container">
+                <div class="card">
+                    <div class="card-title">📊 OPERAZIONI CHIAVE</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-large" onclick="mizipInfo()">🔍 INFO CREDITO</button>
+                        <button class="btn btn-large" onclick="mizipCharge()">💰 RICARICA +5.12€</button>
+                        <button class="btn btn-large btn-danger" onclick="mizipReset()">🔄 RESET CHIAVE</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 LOG OPERAZIONI</div>
+                    <div id="mizip-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- YBB PAGE -->
+        <div id="page-ybb" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>YBB Manager</h1>
+            </header>
+            <div class="container">
+                <div class="card">
+                    <div class="card-title">📊 OPERAZIONI CHIAVE</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-large" onclick="ybbInfo()">🔍 INFO CREDITO</button>
+                        <button class="btn btn-large" onclick="ybbCharge()">💰 RICARICA +5.00€</button>
+                        <button class="btn btn-large btn-danger" onclick="ybbReset()">🔄 RESET CREDITO</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 LOG OPERAZIONI</div>
+                    <div id="ybb-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <div class="log-header">
+                <span>Console Log</span>
+                <span id="clear-log" style="cursor: pointer; text-decoration: underline;">Pulisci</span>
+            </div>
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div class="overlay-content">
+            <div class="nfc-animation"></div>
+            <h2 id="overlay-title" style="margin-bottom: 1rem;">Avvicina la carta</h2>
+            <p id="overlay-msg" style="color: var(--text-secondary);">Il ChameleonUltra è in attesa di un tag HF 14443A...</p>
+            <button id="btn-cancel-op" class="btn btn-danger" style="margin-top: 2rem;">Annulla</button>
+        </div>
+    </div>
+
+    <div id="toast">Operazione completata!</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chameleon-ultra.js@0.4.1/dist/index.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chameleon-ultra.js@0.4.1/dist/plugin/WebbleAdapter.global.js"></script>
+    <script type="module">
+        const { ChameleonUltra, WebbleAdapter, Buffer } = ChameleonUltraJS;
+
+        // --- COSTANTI E DATI FISSI ---
+        const VENDOR_BLOCK = Buffer.from([0xF9, 0x05, 0x01, 0x57, 0x09, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42, 0x7A, 0xA8, 0xF6, 0xDB]);
+        const CREDIT_BLOCK_80 = Buffer.from([0x17, 0x00, 0xC6, 0x01, 0xC8, 0x40, 0x1F, 0xCE, 0x58, 0x35, 0x0B, 0x00, 0x00, 0x64, 0x00, 0xF0]);
+        const OTHER_BLOCK = Buffer.from([0x0C, 0x00, 0xC8, 0x00, 0x00, 0x5E, 0x01, 0x82, 0x99, 0xB4, 0x08, 0x00, 0x00, 0x96, 0x00, 0xC1]);
+        const UNIVERSAL_KEY = Buffer.alloc(6, 0xFF);
+
+        // --- DATI TREA ---
+        const TREA_CARDS = [
+            { uid: [0xD7, 0xA2, 0xDD, 0x6E], name: "PERSONALE", key6: Buffer.from([0x26, 0xF3, 0x30, 0xC3, 0x57, 0x59]) },
+            { uid: [0xF0, 0x11, 0xDE, 0x53], name: "SILV", key6: Buffer.from([0x27, 0x4A, 0x19, 0x90, 0x3F, 0x41]) },
+            { uid: [0x8C, 0x22, 0x0F, 0xA3], name: "STEF", key6: Buffer.from([0xDB, 0x73, 0x62, 0xF8, 0x57, 0x59]) }
+        ];
+        const TREA_KEY_S0 = Buffer.alloc(6, 0xFF);
+        const CREDIT_TREA_BLOCK = 24;
+
+        // --- GESTIONE CARTE UTENTE ---
+        let userComesteroCards = JSON.parse(localStorage.getItem('userComesteroCards') || '[]');
+        let userTreaCards = JSON.parse(localStorage.getItem('userTreaCards') || '[]');
+
+        function saveUserCards() {
+            localStorage.setItem('userComesteroCards', JSON.stringify(userComesteroCards));
+            localStorage.setItem('userTreaCards', JSON.stringify(userTreaCards));
+            renderUserCardLists();
+        }
+
+        function renderUserCardLists() {
+            const comList = document.getElementById('user-comestero-list');
+            const treaList = document.getElementById('user-trea-list');
+
+            if (comList) {
+                comList.innerHTML = userComesteroCards.length > 0 ? '<div style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 0.5rem;">CARTE AGGIUNTE:</div>' : '';
+                userComesteroCards.forEach((card, index) => {
+                    const uidStr = card.uid.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+                    div.style.fontSize = '0.8rem';
+                    const displayName = card.name ? `${card.name} (${uidStr})` : `UID: ${uidStr}`;
+                    div.innerHTML = `
+                        <span>${displayName}</span>
+                        <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.6rem;" onclick="deleteUserCard('comestero', ${index})">ELIMINA</button>
+                    `;
+                    comList.appendChild(div);
+                });
+            }
+
+            if (treaList) {
+                treaList.innerHTML = userTreaCards.length > 0 ? '<div style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 0.5rem;">CARTE AGGIUNTE:</div>' : '';
+                userTreaCards.forEach((card, index) => {
+                    const uidStr = card.uid.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+                    div.style.fontSize = '0.8rem';
+                    div.innerHTML = `
+                        <span>${card.name} (${uidStr})</span>
+                        <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.6rem;" onclick="deleteUserCard('trea', ${index})">ELIMINA</button>
+                    `;
+                    treaList.appendChild(div);
+                });
+            }
+        }
+
+        window.deleteUserCard = function(type, index) {
+            if (type === 'comestero') {
+                userComesteroCards.splice(index, 1);
+            } else {
+                userTreaCards.splice(index, 1);
+            }
+            saveUserCards();
+            showToast('Carta eliminata');
+        };
+
+        function hexToBytes(hex) {
+            const bytes = [];
+            for (let c = 0; c < hex.length; c += 2)
+                bytes.push(parseInt(hex.substr(c, 2), 16));
+            return bytes;
+        }
+
+        // --- STATO APPLICAZIONE ---
+        const ultra = new ChameleonUltra();
+        // L'installazione dell'adapter è asincrona
+        const adapterPromise = ultra.use(new WebbleAdapter());
+        let isConnected = false;
+        let selectedAmount = 5;
+        let selectedAmountComestero = 500;
+
+        // --- DATI COMESTERO ---
+        const COMESTERO_CARDS = [
+            { uid: [0xF3, 0x48, 0x83, 0xEC], key0: [0x4A, 0xF6, 0xF3, 0xC1, 0x40, 0xCD], keyUid: [0x48, 0xC4, 0xEC, 0xD2, 0x33, 0x7D] },
+            { uid: [0xFD, 0x83, 0xCC, 0x30], key0: [0x77, 0xD6, 0x81, 0x0D, 0xAE, 0xC8], keyUid: [0x75, 0xE4, 0x9E, 0x1E, 0xDD, 0x78] },
+            { uid: [0x07, 0xBE, 0x4B, 0xC9], key0: [0x8C, 0xE1, 0x11, 0xAE, 0x85, 0xA7], keyUid: [0x8E, 0xD3, 0x0E, 0xBD, 0xF6, 0x17] },
+            { uid: [0x52, 0x88, 0xD8, 0x7E], key0: [0xA2, 0xD6, 0x82, 0xE3, 0x60, 0xF1], keyUid: [0xA0, 0xE4, 0x9D, 0xF0, 0x13, 0x41] },
+            { uid: [0xFD, 0x83, 0xCC, 0x30], key0: [0x77, 0xD6, 0x81, 0x0D, 0xAE, 0xC8], keyUid: [0x75, 0xE4, 0x9E, 0x1E, 0xDD, 0x78] },
+            { uid: [0x30, 0xE4, 0xD1, 0x07], key0: [0x12, 0x94, 0x51, 0x94, 0xAD, 0xBE], keyUid: [0xF4, 0x75, 0x0C, 0x9A, 0xDB, 0x5B] },
+            { uid: [0x6C, 0x6C, 0xC6, 0x41], key0: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00], keyUid: [0x42, 0x39, 0x5d, 0x00, 0xec, 0xbe] },
+            { uid: [0xC3, 0xCD, 0x46, 0xEC], key0: [0xD0, 0xF4, 0x01, 0x5E, 0x5D, 0x1C], keyUid: [0xD2, 0xC6, 0x1E, 0x4D, 0x2E, 0xAC] },
+            { uid: [0x74, 0x18, 0xCA, 0x0D], key0: [0x14, 0x0C, 0xC9, 0xDE, 0x11, 0x00], keyUid: [0x16, 0x3E, 0xD6, 0xCD, 0x62, 0xB0] },
+            { uid: [0x1D, 0x45, 0xD3, 0x30], key0: [0x8A, 0x00, 0xA9, 0x09, 0x01, 0x58], keyUid: [0x88, 0x32, 0xB6, 0x1A, 0x72, 0xE8] },
+            { uid: [0x70, 0x5E, 0x07, 0xF5], key0: [0x71, 0x36, 0x7D, 0xAF, 0x07, 0xA8], keyUid: [0x73, 0x04, 0x62, 0xBC, 0x74, 0x18] },
+            { uid: [0x14, 0xAC, 0xE9, 0x0D], key0: [0x56, 0x30, 0x0F, 0x8A, 0x2B, 0xF2], keyUid: [0x54, 0x02, 0x10, 0x99, 0x58, 0x42] },
+            { uid: [0x16, 0x7E, 0x82, 0xEF], key0: [0x8D, 0xDB, 0xA1, 0x64, 0x6A, 0xE7], keyUid: [0x8F, 0xE9, 0xBE, 0x77, 0x19, 0x57] },
+            { uid: [0xD3, 0xFA, 0x92, 0x2D], key0: [0x14, 0x68, 0x82, 0xB9, 0xD7, 0xCA], keyUid: [0x16, 0x5A, 0x9D, 0xAA, 0xA4, 0x7A] },
+            { uid: [0xF4, 0x5A, 0x44, 0x0F], key0: [0x79, 0xA2, 0x0F, 0xCF, 0x0F, 0x15], keyUid: [0x7B, 0x90, 0x10, 0xDC, 0x7C, 0xA5] },
+            { uid: [0x34, 0x35, 0xF0, 0x0D], key0: [0xE4, 0xC9, 0x60, 0x7C, 0xFD, 0x28], keyUid: [0xE6, 0xFB, 0x7F, 0x6F, 0x8E, 0x98] },
+            { uid: [0x7B, 0x3A, 0x76, 0x2B], key0: [0xCF, 0xCB, 0xE0, 0xD8, 0x1E, 0x5B], keyUid: [0xCD, 0xF9, 0xFF, 0xCB, 0x6D, 0xEB] }
+        ];
+
+        const XOR_TABLE_A = [
+            [0x00, 0x00, 0x00, 0x00, 0x00, 0x00], [0x0E, 0x3F, 0x57, 0xAF, 0x05, 0x4B], [0x03, 0x85, 0x64, 0x9A, 0x45, 0xCE], [0x01, 0x52, 0xD0, 0x81, 0x9A, 0x49],
+            [0x07, 0x8F, 0xA7, 0x6B, 0xF3, 0xA2], [0x01, 0x9A, 0x8E, 0xBC, 0xAB, 0x42], [0x03, 0x7B, 0x17, 0xC0, 0xC6, 0x83], [0x01, 0xAD, 0x83, 0xD5, 0xD3, 0x94],
+            [0x0F, 0x13, 0x71, 0x49, 0x01, 0xEF], [0x01, 0xE5, 0x91, 0x79, 0x75, 0x9A], [0x03, 0x48, 0x2C, 0x13, 0xCC, 0xAD], [0x01, 0x3E, 0x38, 0x19, 0x89, 0x66],
+            [0x07, 0x78, 0x7D, 0x00, 0x82, 0xE8], [0x01, 0x03, 0x0B, 0x2D, 0xC7, 0x91], [0x03, 0xE2, 0x5A, 0x8A, 0xC8, 0x2E], [0x01, 0x32, 0x86, 0xEB, 0x2B, 0xD2]
+        ];
+
+        const XOR_TABLE_B = [
+            [0x0F, 0xC3, 0x7E, 0xD8, 0xFA, 0x5C], [0x01, 0xB2, 0x8E, 0xEC, 0xB4, 0x3B], [0x03, 0x80, 0x91, 0xFF, 0xC7, 0x8B], [0x01, 0x76, 0xAD, 0xC5, 0x43, 0x65],
+            [0x07, 0x47, 0xBB, 0xB7, 0x9B, 0xBB], [0x01, 0xB8, 0x63, 0x13, 0xD9, 0xDC], [0x03, 0xD0, 0x8D, 0xB4, 0x14, 0x6D], [0x01, 0x1F, 0xEF, 0xCC, 0x46, 0xA2],
+            [0x0F, 0x21, 0x9B, 0x74, 0x0F, 0x80], [0x01, 0xE6, 0xA5, 0xD4, 0xDF, 0x7C], [0x03, 0x85, 0x84, 0x60, 0xB7, 0xF8], [0x01, 0x5A, 0xA2, 0xD7, 0x4C, 0x4A],
+            [0x07, 0x31, 0x65, 0x0F, 0x62, 0x18], [0x01, 0xFF, 0x19, 0xEC, 0x3F, 0x4E], [0x03, 0xCF, 0x7C, 0x1C, 0xA9, 0xE0], [0x01, 0xAE, 0x6E, 0x3A, 0x05, 0xD9]
+        ];
+
+        const XOR_TABLE_SWITCH = [
+            [0x00, 0x00, 0x00, 0x00, 0x00, 0x00], [0x10, 0x7B, 0x94, 0x22, 0x59, 0x24], [0x10, 0x7E, 0x61, 0x47, 0xDB, 0x61], [0x10, 0x5A, 0x1C, 0x03, 0x02, 0x4D],
+            [0x10, 0x92, 0x00, 0xDF, 0x6A, 0x54], [0x10, 0xB0, 0xED, 0x70, 0x18, 0xCA], [0x10, 0x1B, 0x77, 0x04, 0xCA, 0x24], [0x10, 0xA9, 0x1B, 0x1D, 0x5F, 0x12],
+            [0x10, 0x9B, 0xF1, 0x20, 0x51, 0x7D], [0x10, 0x98, 0xC5, 0x8D, 0xFB, 0x9B], [0x10, 0x55, 0x6D, 0xFE, 0x80, 0xCE], [0x10, 0x31, 0xF7, 0x30, 0x45, 0xE2],
+            [0x10, 0x78, 0xEF, 0x3F, 0xA5, 0x12], [0x10, 0x84, 0xFD, 0xFE, 0x5D, 0xCD], [0x10, 0xA9, 0xDB, 0x68, 0x3C, 0x03], [0x10, 0x35, 0x33, 0xB9, 0x12, 0x08]
+        ];
+
+        // --- GESTIONE MIZIP ---
+        const MIZIP_XOR_A = [
+            [0x09, 0x12, 0x5A, 0x25, 0x89, 0xE5],
+            [0xAB, 0x75, 0xC9, 0x37, 0x92, 0x2F],
+            [0xE2, 0x72, 0x41, 0xAF, 0x2C, 0x09],
+            [0x31, 0x7A, 0xB7, 0x2F, 0x44, 0x90]
+        ];
+        const MIZIP_XOR_B = [
+            [0xF1, 0x2C, 0x84, 0x53, 0xD8, 0x21],
+            [0x73, 0xE7, 0x99, 0xFE, 0x32, 0x41],
+            [0xAA, 0x4D, 0x13, 0x76, 0x56, 0xAE],
+            [0xB0, 0x13, 0x27, 0x27, 0x2D, 0xFD]
+        ];
+        const MIZIP_ORDER_A = [0, 1, 2, 3, 0, 1];
+        const MIZIP_ORDER_B = [2, 3, 0, 1, 2, 3];
+
+        function generateMizipKeys(uid) {
+            const keysA = [];
+            const keysB = [];
+            for (let j = 0; j < 4; j++) {
+                const kA = [];
+                const kB = [];
+                for (let i = 0; i < 6; i++) {
+                    kA.push(uid[MIZIP_ORDER_A[i]] ^ MIZIP_XOR_A[j][i]);
+                    kB.push(uid[MIZIP_ORDER_B[i]] ^ MIZIP_XOR_B[j][i]);
+                }
+                keysA.push(kA);
+                keysB.push(kB);
+            }
+            return { keysA, keysB };
+        }
+
+        async function mizipInfo() {
+            const logEl = document.getElementById('mizip-log');
+            logEl.innerHTML = "Avvicina la chiave MiZIP...";
+            
+            try {
+                const uid = await ultra.getUid();
+                logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
+                
+                const { keysB } = generateMizipKeys(uid);
+                
+                // Auth settore 2 (blocco 8) con Key B
+                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
+                const block10 = await ultra.mf1Read(10);
+                
+                let currentBlock = 8;
+                let prevBlock = 9;
+                
+                if (block10[0] === 0xAA) {
+                    currentBlock = 8; prevBlock = 9;
+                } else if (block10[0] === 0x55) {
+                    currentBlock = 9; prevBlock = 8;
+                }
+                
+                const dataCurr = await ultra.mf1Read(currentBlock);
+                const dataPrev = await ultra.mf1Read(prevBlock);
+                
+                const credit = ((dataCurr[2] << 8) | dataCurr[1]) / 100;
+                const prevCredit = ((dataPrev[2] << 8) | dataPrev[1]) / 100;
+                
+                logEl.innerHTML = `
+                    <div style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 0.5rem;">CHIAVE RICONOSCIUTA</div>
+                    <div style="font-family: var(--font-mono); background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 4px;">
+                        UID: ${uid.toString('hex').toUpperCase()}<br>
+                        CREDITO ATTUALE: € ${credit.toFixed(2)}<br>
+                        CREDITO PRECEDENTE: € ${prevCredit.toFixed(2)}
+                    </div>
+                `;
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        async function mizipCharge() {
+            const logEl = document.getElementById('mizip-log');
+            logEl.innerHTML = "Preparazione ricarica...";
+            
+            try {
+                const uid = await ultra.getUid();
+                const { keysB } = generateMizipKeys(uid);
+                
+                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
+                const block10 = await ultra.mf1Read(10);
+                
+                let currentBlock = 8;
+                let prevBlock = 9;
+                if (block10[0] === 0xAA) { currentBlock = 8; prevBlock = 9; }
+                else if (block10[0] === 0x55) { currentBlock = 9; prevBlock = 8; }
+                
+                const dataCurr = await ultra.mf1Read(currentBlock);
+                const oldData = Buffer.from(dataCurr);
+                
+                // Incremento credito (+5.12€ come da esempio C++)
+                dataCurr[2] += 0x02;
+                dataCurr[3] = dataCurr[1] ^ dataCurr[2]; // Checksum mode
+                
+                await ultra.mf1Write(currentBlock, dataCurr);
+                await ultra.mf1Write(prevBlock, oldData);
+                
+                const newCredit = ((dataCurr[2] << 8) | dataCurr[1]) / 100;
+                logEl.innerHTML = `<span style="color: var(--accent-color)">RICARICA COMPLETATA!</span><br>Nuovo Credito: € ${newCredit.toFixed(2)}`;
+                showToast('Ricarica completata');
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        async function mizipReset() {
+            const logEl = document.getElementById('mizip-log');
+            logEl.innerHTML = "Reset in corso...";
+            
+            try {
+                const uid = await ultra.getUid();
+                const { keysB } = generateMizipKeys(uid);
+                
+                const settori = [
+                    Buffer.from([0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00]),
+                    Buffer.from([0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01]),
+                    Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+                    Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]),
+                    Buffer.from([0x55, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+                ];
+
+                // Auth Settore 1
+                await ultra.mf1Auth(4, 1, Buffer.from(keysB[1]));
+                await ultra.mf1Write(4, settori[0]);
+                await ultra.mf1Write(5, settori[1]);
+                await ultra.mf1Write(6, settori[4]);
+
+                // Auth Settore 2
+                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
+                await ultra.mf1Write(8, settori[2]);
+                await ultra.mf1Write(9, settori[3]);
+                await ultra.mf1Write(10, settori[4]);
+
+                logEl.innerHTML = `<span style="color: var(--accent-color)">RESET COMPLETATO!</span><br>Credito riportato a € 0.00`;
+                showToast('Reset completato');
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        // --- GESTIONE YBB ---
+        const YBB_KEY_B = Buffer.from([0x64, 0xD3, 0xC9, 0xEE, 0x7C, 0x3D]);
+        const YBB_BLOCK_CREDIT = 6;
+
+        async function ybbInfo() {
+            const logEl = document.getElementById('ybb-log');
+            logEl.innerHTML = "Avvicina il tag YBB...";
+            
+            try {
+                const uid = await ultra.getUid();
+                logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
+                
+                // Auth blocco 6 con Key B
+                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
+                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                
+                const credit = ((data[1] << 8) | data[2]) / 100;
+                
+                logEl.innerHTML = `
+                    <div style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 0.5rem;">TAG RICONOSCIUTO</div>
+                    <div style="font-family: var(--font-mono); background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 4px;">
+                        UID: ${uid.toString('hex').toUpperCase()}<br>
+                        CREDITO ATTUALE: € ${credit.toFixed(2)}
+                    </div>
+                `;
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        async function ybbCharge() {
+            const logEl = document.getElementById('ybb-log');
+            logEl.innerHTML = "Preparazione ricarica...";
+            
+            try {
+                const uid = await ultra.getUid();
+                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
+                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                
+                let credit = (data[1] << 8) | data[2];
+                credit += 500; // +5.00€
+                
+                data[1] = (credit >> 8) & 0xFF;
+                data[2] = credit & 0xFF;
+                
+                await ultra.mf1Write(YBB_BLOCK_CREDIT, data);
+                
+                logEl.innerHTML = `<span style="color: var(--accent-color)">RICARICA COMPLETATA!</span><br>Nuovo Credito: € ${(credit / 100).toFixed(2)}`;
+                showToast('Ricarica completata');
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        async function ybbReset() {
+            const logEl = document.getElementById('ybb-log');
+            logEl.innerHTML = "Reset credito...";
+            
+            try {
+                const uid = await ultra.getUid();
+                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
+                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                
+                data[1] = 0x00;
+                data[2] = 0x00;
+                
+                await ultra.mf1Write(YBB_BLOCK_CREDIT, data);
+                
+                logEl.innerHTML = `<span style="color: var(--accent-color)">RESET COMPLETATO!</span><br>Credito riportato a € 0.00`;
+                showToast('Reset completato');
+            } catch (e) {
+                logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+            }
+        }
+
+        // --- GESTIONE NAVIGAZIONE ---
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            log(`Navigazione: ${pageId.replace('page-', '').toUpperCase()}`);
+        };
+
+        // --- GESTIONE AUTENTICAZIONE ---
+        const AUTH_HASH = '4f5f6bba9489676ab9ca676ed37287c7410e5a2db693f9a288c1b06a52e7a560'; // SHA-256 di Maco2025
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function checkAuth() {
+            const pass = document.getElementById('login-pass').value;
+            const hash = await sha256(pass);
+            if (hash === AUTH_HASH) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('login-pass').value = '';
+            }
+        }
+
+        document.getElementById('btn-login').onclick = checkAuth;
+        document.getElementById('login-pass').onkeypress = (e) => {
+            if (e.key === 'Enter') checkAuth();
+        };
+
+        // Check Bluetooth Support
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Verifica Browser
+            const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            const isEdge = /Edg/.test(navigator.userAgent);
+            
+            if (!isChrome && !isEdge) {
+                log('Attenzione: Web Bluetooth è supportato ufficialmente solo su Chrome e Edge.', 'warn');
+            }
+
+            if (!navigator.bluetooth) {
+                log('Web Bluetooth non è supportato in questo browser o contesto.', 'error');
+                log('Assicurati di usare Chrome/Edge e di aver aperto l\'app a schermo intero.', 'info');
+                btnConnect.disabled = true;
+                btnConnect.textContent = 'BLE NON SUPPORTATO';
+            } else {
+                try {
+                    const available = await navigator.bluetooth.getAvailability();
+                    if (!available) {
+                        log('Bluetooth hardware non rilevato o disattivato sul tuo dispositivo.', 'warn');
+                        log('Attiva il Bluetooth nelle impostazioni del sistema.', 'info');
+                    } else {
+                        log('Sistema pronto. Clicca su Connetti per iniziare.');
+                    }
+                } catch (e) {
+                    console.error('Errore getAvailability:', e);
+                    log('Sistema pronto. Clicca su Connetti per iniziare.');
+                }
+            }
+        });
+
+        // --- ELEMENTI UI ---
+        const terminal = document.getElementById('terminal');
+        const btnConnect = document.getElementById('btn-connect');
+        const btnDisconnect = document.getElementById('btn-disconnect');
+        const led = document.getElementById('connection-led');
+        const statusText = document.getElementById('connection-status');
+        const deviceInfo = document.getElementById('device-info');
+        const deviceName = document.getElementById('device-name');
+        const fwVersion = document.getElementById('fw-version');
+        const actionButtons = [
+            document.getElementById('btn-read-info'),
+            document.getElementById('btn-recharge'),
+            document.getElementById('btn-reset'),
+            document.getElementById('btn-read-info-comestero'),
+            document.getElementById('btn-recharge-comestero'),
+            document.getElementById('btn-reset-comestero'),
+            document.getElementById('btn-read-info-trea'),
+            document.getElementById('btn-recharge-trea'),
+            document.getElementById('btn-reset-trea'),
+            document.getElementById('btn-god-activate'),
+            document.getElementById('btn-god-deactivate')
+        ];
+        const overlay = document.getElementById('overlay');
+        const btnCancelOp = document.getElementById('btn-cancel-op');
+        const toast = document.getElementById('toast');
+
+        // --- FUNZIONI DI LOG ---
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${msg}`;
+            terminal.appendChild(entry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function logHex(label, data) {
+            const hex = Array.from(data).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            log(`${label}: ${hex}`, 'hex');
+        }
+
+        document.getElementById('clear-log').onclick = () => terminal.innerHTML = '';
+
+        // --- FUNZIONI DI CALCOLO MICROEL ---
+        function calcolaSommaHex(uid) {
+            const xorKey = new Uint8Array([0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9]);
+            let somma = 0;
+            for (let i = 0; i < uid.length; i++) somma += uid[i];
+            let sommaDueNumeri = somma % 256;
+            if (sommaDueNumeri % 2 === 1) sommaDueNumeri += 2;
+            const sommaHex = new Uint8Array(6);
+            for (let i = 0; i < xorKey.length; i++) sommaHex[i] = sommaDueNumeri ^ xorKey[i];
+            return sommaHex;
+        }
+
+        function generaKeyA(uid) {
+            const sommaHex = calcolaSommaHex(uid);
+            const primoCarattere = (sommaHex[0] >> 4) & 0xF;
+            const keyA = Buffer.alloc(6);
+            if ([0x2, 0x3, 0xA, 0xB].includes(primoCarattere)) {
+                for (let i = 0; i < sommaHex.length; i++) keyA[i] = 0x40 ^ sommaHex[i];
+            } else if ([0x6, 0x7, 0xE, 0xF].includes(primoCarattere)) {
+                for (let i = 0; i < sommaHex.length; i++) keyA[i] = 0xC0 ^ sommaHex[i];
+            } else {
+                keyA.set(sommaHex);
+            }
+            return keyA;
+        }
+
+        function generaKeyB(keyA) {
+            const keyB = Buffer.alloc(6);
+            for (let i = 0; i < keyA.length; i++) keyB[i] = 0xFF ^ keyA[i];
+            return keyB;
+        }
+
+        function calcolaChecksum(data) {
+            let somma = 0;
+            for (let i = 0; i < 15; i++) somma += data[i];
+            return ((somma & 0xFF) + 33) & 0xFF;
+        }
+
+        // --- FUNZIONI COMESTERO ---
+        function calculateKeyComestero(prevKey, sector, type) {
+            const dest = Buffer.alloc(6);
+            if (sector === 0 && type === 'A') {
+                return Buffer.from([0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5]);
+            }
+            let table;
+            if (type === 'A') table = XOR_TABLE_A;
+            else if (type === 'B') table = XOR_TABLE_B;
+            else if (type === '0') table = XOR_TABLE_SWITCH;
+
+            for (let i = 0; i < 6; i++) {
+                dest[i] = table[sector][i] ^ prevKey[i];
+            }
+            return dest;
+        }
+
+        function calculateCRC8_MIFARE(data) {
+            const polynomial = 0x1D;
+            let crc = 0xC7;
+            for (let i = 0; i < data.length; i++) {
+                crc ^= data[i];
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x80) {
+                        crc = ((crc << 1) ^ polynomial) & 0xFF;
+                    } else {
+                        crc = (crc << 1) & 0xFF;
+                    }
+                }
+            }
+            return crc;
+        }
+
+        function processGodModeData(data, activate) {
+            const newData = Buffer.from(data);
+            if (activate) {
+                newData[4] = 0x02;
+            } else {
+                newData[4] = 0x00;
+            }
+            const crc = calculateCRC8_MIFARE(newData.slice(0, 15));
+            newData[15] = crc;
+            return newData;
+        }
+
+        function findComesteroCard(uid) {
+            const uidArr = Array.from(uid);
+            const allCards = [...COMESTERO_CARDS, ...userComesteroCards];
+            return allCards.find(c => {
+                return c.uid.every((val, index) => val === uidArr[index]);
+            });
+        }
+
+        function findTreaCard(uid) {
+            const uidArr = Array.from(uid);
+            const allCards = [...TREA_CARDS, ...userTreaCards];
+            return allCards.find(c => {
+                return c.uid.every((val, index) => val === uidArr[index]);
+            });
+        }
+
+        function leggiCredito(blockData) {
+            return (blockData[6] << 8) | blockData[5];
+        }
+
+        function aggiornaCredito(blockData, nuovoCredito) {
+            blockData[5] = nuovoCredito & 0xFF;
+            blockData[6] = (nuovoCredito >> 8) & 0xFF;
+            blockData[15] = calcolaChecksum(blockData);
+        }
+
+        function preparaBloccoTrailer(keyA, keyB) {
+            const trailer = Buffer.alloc(16);
+            trailer.set(keyA, 0);
+            trailer[6] = 0xFF; trailer[7] = 0x07; trailer[8] = 0x80; trailer[9] = 0x69;
+            trailer.set(keyB, 10);
+            return trailer;
+        }
+
+        // --- GESTIONE CONNESSIONE ---
+        async function connect() {
+            try {
+                await adapterPromise;
+                
+                if (!navigator.bluetooth) {
+                    throw new Error('Web Bluetooth non supportato in questo browser.');
+                }
+
+                log('Richiesta permessi Bluetooth...');
+                
+                // Verifica disponibilità hardware
+                if (navigator.bluetooth.getAvailability) {
+                    const available = await navigator.bluetooth.getAvailability();
+                    if (!available) {
+                        throw new Error('Bluetooth non disponibile. Assicurati che sia attivo nelle impostazioni del sistema.');
+                    }
+                }
+
+                // Chiamata esplicita a connect() che attiva il selettore di dispositivi
+                log('Seleziona il tuo ChameleonUltra dalla lista che apparirà...', 'info');
+                await ultra.connect();
+                
+                log('Connessione stabilita! Recupero informazioni dispositivo...');
+                const version = await ultra.cmdGetAppVersion();
+                
+                isConnected = true;
+                led.classList.add('connected');
+                statusText.textContent = 'CONNESSO';
+                btnConnect.style.display = 'none';
+                btnDisconnect.style.display = 'inline-flex';
+                
+                deviceInfo.style.display = 'block';
+                deviceName.textContent = 'ChameleonUltra';
+                fwVersion.textContent = `${version}`;
+                
+                const treaDeviceInfo = document.getElementById('trea-device-info');
+                const treaDeviceName = document.getElementById('trea-device-name');
+                if (treaDeviceInfo) treaDeviceInfo.style.display = 'block';
+                if (treaDeviceName) treaDeviceName.textContent = 'ChameleonUltra';
+                
+                actionButtons.forEach(btn => btn.disabled = false);
+                log('Chameleon pronto all\'uso!', 'info');
+                showToast('Chameleon connesso!');
+            } catch (error) {
+                console.error('Dettagli errore connessione:', error);
+                
+                let msg = error.message;
+                if (msg.includes('WebBLE not supported')) {
+                    msg = 'Web Bluetooth non supportato o Bluetooth disattivato sul dispositivo.';
+                }
+
+                if (error.name === 'NotFoundError' || msg.includes('User cancelled')) {
+                    log('Connessione annullata: nessun dispositivo selezionato.', 'warn');
+                } else if (error.name === 'SecurityError') {
+                    log('Errore di sicurezza: assicurati di usare il link "Schermo Intero".', 'error');
+                    alert('Il browser ha bloccato l\'accesso al Bluetooth. Apri l\'app usando il link "Apri App a Schermo Intero" sopra il terminale.');
+                } else {
+                    log(`Errore: ${msg}`, 'error');
+                    if (msg.includes('not supported')) {
+                        alert('Errore: Web Bluetooth non supportato. Assicurati che il Bluetooth sia ATTIVO nelle impostazioni del tuo PC/Smartphone e di usare Chrome o Edge.');
+                    }
+                }
+            }
+        }
+
+        async function disconnect() {
+            try {
+                // The adapter handles disconnection when the device is lost or manually closed
+                // In chameleon-ultra.js, we can just reset our state as the adapter manages the physical link
+                isConnected = false;
+                led.classList.remove('connected');
+                statusText.textContent = 'DISCONNESSO';
+                btnConnect.style.display = 'inline-flex';
+                btnDisconnect.style.display = 'none';
+                deviceInfo.style.display = 'none';
+                const treaDeviceInfo = document.getElementById('trea-device-info');
+                if (treaDeviceInfo) treaDeviceInfo.style.display = 'none';
+                actionButtons.forEach(btn => btn.disabled = true);
+                log('Disconnesso.');
+            } catch (error) {
+                log(`Errore disconnessione: ${error.message}`, 'error');
+            }
+        }
+
+        btnConnect.onclick = connect;
+        btnDisconnect.onclick = disconnect;
+
+        // --- UTILITY UI ---
+        function showOverlay(title, msg) {
+            document.getElementById('overlay-title').textContent = title;
+            document.getElementById('overlay-msg').textContent = msg;
+            overlay.style.display = 'flex';
+        }
+
+        function hideOverlay() {
+            overlay.style.display = 'none';
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        // --- OPERAZIONI CARTE ---
+
+        // --- SELEZIONE IMPORTI ---
+        // Utilizziamo la delegazione degli eventi per maggiore robustezza
+        document.addEventListener('click', (e) => {
+            const opt = e.target.closest('.recharge-option');
+            if (opt) {
+                document.querySelectorAll('.recharge-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                selectedAmount = parseInt(opt.dataset.amount);
+                log(`Importo Microel selezionato: ${selectedAmount.toFixed(2)}€`);
+                return;
+            }
+
+            const optCom = e.target.closest('.recharge-option-comestero');
+            if (optCom) {
+                document.querySelectorAll('.recharge-option-comestero').forEach(o => o.classList.remove('active'));
+                optCom.classList.add('active');
+                selectedAmountComestero = parseInt(optCom.dataset.amount);
+                log(`Importo Comestero selezionato: ${(selectedAmountComestero/100).toFixed(2)}€`);
+                return;
+            }
+        });
+
+        async function readTagUID() {
+            showOverlay('Avvicina la carta', 'In attesa di un tag HF 14443A...');
+            const startTime = Date.now();
+            const timeout = 30000; // 30s
+            try {
+                while (Date.now() - startTime < timeout) {
+                    // Check if user cancelled via overlay hide
+                    if (overlay.style.display === 'none') throw new Error('Operazione annullata');
+                    
+                    try {
+                        // In v0.4.1, cmdHf14aScan returns an array of Hf14aAntiColl objects
+                        const tags = await ultra.cmdHf14aScan();
+                        if (tags && tags.length > 0) {
+                            hideOverlay();
+                            return Buffer.from(tags[0].uid);
+                        }
+                    } catch (scanErr) {
+                        // Ignore scan errors during polling (e.g. tag not found)
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 500)); // Wait 500ms before retry
+                }
+                throw new Error('Timeout: nessuna carta rilevata.');
+            } catch (e) {
+                hideOverlay();
+                if (e.message !== 'Operazione annullata') {
+                    log(`Errore lettura UID: ${e.message}`, 'error');
+                }
+                throw e;
+            }
+        }
+
+        // 1. LEGGI INFO CARTA
+        document.getElementById('btn-read-info').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                logHex('UID rilevato', uid);
+                
+                const keyA = generaKeyA(uid);
+                logHex('KeyA generata', keyA);
+
+                log('Lettura dati carta...');
+                // Sector 1 starts at block 4
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
+                const block5 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 5, keyType: 0x60, key: keyA }));
+                
+                logHex('Blocco 4', block4);
+                logHex('Blocco 5', block5);
+
+                const credito = leggiCredito(block4);
+                const creditoPrec = leggiCredito(block5);
+                const checksum = block4[15];
+
+                document.getElementById('res-uid').textContent = Array.from(uid).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':');
+                document.getElementById('res-keya').textContent = Array.from(keyA).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':');
+                document.getElementById('res-credit').textContent = `${(credito / 100).toFixed(2)} €`;
+                document.getElementById('res-prev-credit').textContent = `${(creditoPrec / 100).toFixed(2)} €`;
+                document.getElementById('res-checksum').textContent = `0x${checksum.toString(16).toUpperCase()}`;
+                
+                document.getElementById('info-results').style.display = 'block';
+                showToast('Lettura completata!');
+            } catch (e) {
+                log(`Errore operazione: ${e.message}`, 'error');
+            }
+        };
+
+        // --- GESTIONE TREA ---
+        document.getElementById('btn-read-info-trea').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                logHex('UID rilevato', uid);
+                
+                const card = findTreaCard(uid);
+                if (!card) throw new Error('Carta non riconosciuta come Trea');
+                
+                log(`Carta riconosciuta: ${card.name}`);
+                log('Autenticazione Settore 0...');
+                // Authenticate Sector 0 (Block 3)
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                
+                log('Autenticazione Settore 6 e lettura credito...');
+                // Authenticate Sector 6 (Block 24) and read
+                const data = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: CREDIT_TREA_BLOCK, keyType: 0x61, key: card.key6 }));
+                logHex('Dati Blocco 24', data);
+                
+                const credit = (data[0] * 10 + data[1]) * 100;
+                
+                document.getElementById('res-uid-trea').textContent = Array.from(uid).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':');
+                document.getElementById('res-type-trea').textContent = card.name;
+                document.getElementById('res-credit-trea').textContent = `${(credit / 100).toFixed(2)} €`;
+                
+                document.getElementById('info-results-trea').style.display = 'block';
+                showToast('Lettura completata!');
+            } catch (e) {
+                log(`Errore operazione: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-recharge-trea').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                logHex('UID rilevato', uid);
+                
+                const card = findTreaCard(uid);
+                if (!card) throw new Error('Carta non riconosciuta come Trea');
+                
+                log(`Carta riconosciuta: ${card.name}`);
+                log('Autenticazione Settore 0...');
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                
+                log('Scrittura ricarica (55€)...');
+                const rechargeData = Buffer.alloc(16, 0);
+                rechargeData[0] = 0x05;
+                rechargeData[1] = 0x05;
+                
+                await ultra.cmdMf1WriteBlock({ 
+                    block: CREDIT_TREA_BLOCK, 
+                    keyType: 0x61, 
+                    key: card.key6, 
+                    data: rechargeData 
+                });
+                
+                log('Ricarica effettuata con successo!', 'info');
+                showToast('Ricarica effettuata!');
+            } catch (e) {
+                log(`Errore ricarica: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-reset-trea').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                logHex('UID rilevato', uid);
+                
+                const card = findTreaCard(uid);
+                if (!card) throw new Error('Carta non riconosciuta come Trea');
+                
+                log(`Carta riconosciuta: ${card.name}`);
+                log('Autenticazione Settore 0...');
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                
+                log('Azzeramento credito...');
+                const zeroData = Buffer.alloc(16, 0);
+                
+                await ultra.cmdMf1WriteBlock({ 
+                    block: CREDIT_TREA_BLOCK, 
+                    keyType: 0x61, 
+                    key: card.key6, 
+                    data: zeroData 
+                });
+                
+                log('Credito azzerato con successo!', 'info');
+                showToast('Reset completato!');
+            } catch (e) {
+                log(`Errore reset: ${e.message}`, 'error');
+            }
+        };
+
+        // --- AGGIUNTA CARTE ---
+        document.getElementById('btn-add-comestero-card').onclick = () => {
+            const name = document.getElementById('new-comestero-name').value.trim();
+            const uidStr = document.getElementById('new-comestero-uid').value.trim();
+            const key0Str = document.getElementById('new-comestero-key0').value.trim();
+            const keyUidStr = document.getElementById('new-comestero-keyuid').value.trim();
+
+            if (!name || uidStr.length !== 8 || key0Str.length !== 12 || keyUidStr.length !== 12) {
+                alert('Formato non valido. Nome richiesto, UID: 8 hex, Chiavi: 12 hex.');
+                return;
+            }
+
+            try {
+                const newCard = {
+                    name: name,
+                    uid: hexToBytes(uidStr),
+                    key0: hexToBytes(key0Str),
+                    keyUid: hexToBytes(keyUidStr)
+                };
+                userComesteroCards.push(newCard);
+                saveUserCards();
+                showToast('Carta Comestero aggiunta!');
+                document.getElementById('new-comestero-name').value = '';
+                document.getElementById('new-comestero-uid').value = '';
+                document.getElementById('new-comestero-key0').value = '';
+                document.getElementById('new-comestero-keyuid').value = '';
+            } catch (e) {
+                alert('Errore nel formato hex.');
+            }
+        };
+
+        document.getElementById('btn-add-trea-card').onclick = () => {
+            const name = document.getElementById('new-trea-name').value.trim();
+            const uidStr = document.getElementById('new-trea-uid').value.trim();
+            const key6Str = document.getElementById('new-trea-key6').value.trim();
+
+            if (!name || uidStr.length !== 8 || key6Str.length !== 12) {
+                alert('Formato non valido. Nome richiesto, UID: 8 hex, Key6: 12 hex.');
+                return;
+            }
+
+            try {
+                const newCard = {
+                    uid: hexToBytes(uidStr),
+                    key6: hexToBytes(key6Str),
+                    name: name
+                };
+                userTreaCards.push(newCard);
+                saveUserCards();
+                showToast('Carta Trea aggiunta!');
+                document.getElementById('new-trea-name').value = '';
+                document.getElementById('new-trea-uid').value = '';
+                document.getElementById('new-trea-key6').value = '';
+            } catch (e) {
+                alert('Errore nel formato hex.');
+            }
+        };
+
+        // --- OPERAZIONI COMESTERO ---
+        document.getElementById('btn-read-info-comestero').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                logHex('UID Comestero', uid);
+                const card = findComesteroCard(uid);
+                if (!card) throw new Error('Carta Comestero non riconosciuta.');
+
+                const keyB = Buffer.from(card.keyUid);
+                logHex('KeyB Autenticazione', keyB);
+
+                log('Lettura dati settore 2...');
+                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 8, keyType: 0x61, key: keyB }));
+                const block9 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 9, keyType: 0x61, key: keyB }));
+                
+                const credit = (block8[1] << 8) | block8[0];
+                const prevCredit = (block9[1] << 8) | block9[0];
+
+                document.getElementById('res-uid-comestero').textContent = Array.from(uid).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':');
+                document.getElementById('res-credit-comestero').textContent = (credit / 100).toFixed(2) + '€';
+                document.getElementById('res-prev-credit-comestero').textContent = (prevCredit / 100).toFixed(2) + '€';
+                
+                document.getElementById('info-results-comestero').style.display = 'block';
+                log('Info Comestero lette!');
+                showToast('Info Comestero lette!');
+            } catch (e) {
+                log(`Errore Comestero: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-recharge-comestero').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                const card = findComesteroCard(uid);
+                if (!card) throw new Error('Carta Comestero non riconosciuta.');
+
+                const keyB = Buffer.from(card.keyUid);
+                log('Lettura credito attuale...');
+                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 8, keyType: 0x61, key: keyB }));
+                const prevData = Buffer.from(block8);
+
+                let credit = (block8[1] << 8) | block8[0];
+                credit += selectedAmountComestero;
+                
+                block8[0] = credit & 0xFF;
+                block8[1] = (credit >> 8) & 0xFF;
+                block8[4] = block8[0] ^ 0xFF;
+                block8[5] = block8[1] ^ 0xFF;
+                block8[8] = block8[0];
+                block8[9] = block8[1];
+
+                log(`Scrittura nuovo credito: ${(credit/100).toFixed(2)}€`);
+                await ultra.cmdMf1WriteBlock({ block: 8, keyType: 0x61, key: keyB, data: block8 });
+                await ultra.cmdMf1WriteBlock({ block: 9, keyType: 0x61, key: keyB, data: prevData });
+
+                log('Scrittura blocco 1 settore 0...');
+                const key0 = Buffer.from(card.key0);
+                const dataBlock1 = Buffer.from([0x0F, 0x00, 0x26, 0x88, 0x26, 0x88, 0x26, 0x88, 0x26, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+                await ultra.cmdMf1WriteBlock({ block: 1, keyType: 0x61, key: key0, data: dataBlock1 });
+
+                log('Ricarica Comestero completata!');
+                showToast('Ricarica effettuata!');
+            } catch (e) {
+                log(`Errore ricarica: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-reset-comestero').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                const card = findComesteroCard(uid);
+                if (!card) throw new Error('Carta Comestero non riconosciuta.');
+
+                const key0 = Buffer.from(card.key0);
+                const allKeysB = [key0];
+                
+                // Genera tutte le chiavi B
+                for (let i = 0; i < 15; i++) {
+                    allKeysB.push(calculateKeyComestero(allKeysB[i], i === 0 ? 1 : i + 1, 'B'));
+                }
+
+                log('Inizio reset blocchi (1-10)...');
+                const emptyData = Buffer.alloc(16, 0);
+                const block1Data = Buffer.alloc(16, 0);
+                block1Data[0] = 0xCE;
+
+                for (let block = 1; block <= 10; block++) {
+                    if (block === 3 || block === 7) continue;
+                    const sector = Math.floor(block / 4);
+                    const key = allKeysB[sector];
+                    
+                    await ultra.cmdMf1WriteBlock({ block: block, keyType: 0x61, key: key, data: block === 1 ? block1Data : emptyData });
+                    log(`Blocco ${block} resettato.`);
+                }
+
+                log('Reset Comestero completato!');
+                showToast('Reset effettuato!');
+            } catch (e) {
+                log(`Errore reset: ${e.message}`, 'error');
+            }
+        };
+
+        const handleGodMode = async (activate) => {
+            try {
+                const uid = await readTagUID();
+                const card = findComesteroCard(uid);
+                if (!card) throw new Error('Carta Comestero non riconosciuta.');
+
+                const key0 = Buffer.from(card.key0);
+                const keySector1 = calculateKeyComestero(key0, 1, 'B');
+                
+                log('Lettura blocco 5...');
+                const block5 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 5, keyType: 0x61, key: keySector1 }));
+                const newData = processGodModeData(block5, activate);
+                
+                log(activate ? 'Attivazione God Mode...' : 'Disattivazione God Mode...');
+                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x61, key: keySector1, data: newData });
+                
+                log(`God Mode ${activate ? 'Attivata' : 'Tolta'}!`);
+                showToast(`God Mode ${activate ? 'Attiva' : 'Disattivata'}`);
+            } catch (e) {
+                log(`Errore God Mode: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-god-activate').onclick = () => handleGodMode(true);
+        document.getElementById('btn-god-deactivate').onclick = () => handleGodMode(false);
+
+        // 2. RICARICA
+        document.getElementById('btn-recharge').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                const keyA = generaKeyA(uid);
+                
+                log('Lettura credito attuale...');
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
+                const creditoAttuale = leggiCredito(block4);
+                
+                const nuovoCredito = creditoAttuale + (selectedAmount * 100);
+                log(`Credito attuale: ${creditoAttuale/100}€ -> Nuovo: ${nuovoCredito/100}€`);
+                
+                const nuovoBlock4 = Buffer.from(block4);
+                aggiornaCredito(nuovoBlock4, nuovoCredito);
+                
+                // Per Microel, il blocco 5 spesso contiene il credito precedente
+                const nuovoBlock5 = Buffer.from(block4); // Copia vecchio credito in blocco 5
+                
+                log('Scrittura nuovi dati...');
+                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4 });
+                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock5 });
+                
+                log('Verifica...', 'info');
+                const verify = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
+                if (leggiCredito(verify) === nuovoCredito) {
+                    showToast(`Ricarica di ${selectedAmount}€ effettuata!`);
+                    log('Ricarica completata con successo!');
+                } else {
+                    throw new Error('Verifica fallita dopo scrittura');
+                }
+            } catch (e) {
+                log(`Errore ricarica: ${e.message}`, 'error');
+            }
+        };
+
+        // 3. RESET
+        document.getElementById('btn-reset').onclick = async () => {
+            if (!confirm('Sei sicuro di voler azzerare il credito?')) return;
+
+            try {
+                const uid = await readTagUID();
+                const keyA = generaKeyA(uid);
+                
+                log('Lettura blocco 4...');
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
+                
+                log('Azzeramento credito...');
+                const nuovoBlock4 = Buffer.from(block4);
+                aggiornaCredito(nuovoBlock4, 0);
+                
+                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4 });
+                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock4 });
+                
+                showToast('Credito azzerato!');
+                log('Reset completato.');
+            } catch (e) {
+                log(`Errore reset: ${e.message}`, 'error');
+            }
+        };
+
+        btnCancelOp.onclick = () => {
+            // There isn't a direct "cancel" for the reader command in the SDK easily exposed without closing connection
+            // but we can hide the UI. The command will eventually timeout.
+            hideOverlay();
+            log('Operazione annullata dall\'utente (il dispositivo rimarrà in ascolto fino al timeout).', 'warn');
+        };
+
+        // Inizializzazione liste carte utente
+        renderUserCardLists();
+
+    </script>
+</body>
+</html>

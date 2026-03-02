@@ -1,0 +1,5 @@
+{
+  "name": "ChameleonUltra Microel Manager",
+  "description": "Gestione carte Microel (Mifare Classic 1K) via Bluetooth con ChameleonUltra",
+  "requestFramePermissions": ["bluetooth"]
+}
