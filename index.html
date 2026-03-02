@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChameleonUltra - Microel Manager BLE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #0a0e27;
+            --card-bg: #1a1f35;
+            --accent-color: #00ff9d;
+            --accent-glow: rgba(0, 255, 157, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #8e9299;
+            --error-color: #ff4444;
+            --warning-color: #f27d26;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+
+        header {
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(to bottom, #0d1231, var(--bg-color));
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--error-color);
+            box-shadow: 0 0 5px var(--error-color);
+            transition: all 0.3s ease;
+        }
+
+        .led.connected {
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--accent-color);
+            background: transparent;
+            color: var(--accent-color);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            outline: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1rem;
+        }
+
+        .btn-danger {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--error-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        /* Grid Layout */
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 255, 157, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Info Table */
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .info-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-table td:first-child {
+            color: var(--text-secondary);
+            width: 40%;
+        }
+
+        .info-table td:last-child {
+            text-align: right;
+            color: var(--accent-color);
+        }
+
+        /* Recharge Selector */
+
+        .recharge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .recharge-option, .recharge-option-comestero {
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .recharge-option:hover, .recharge-option-comestero:hover {
+            border-color: rgba(0, 255, 157, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .recharge-option.active, .recharge-option-comestero.active {
+            border-color: var(--accent-color);
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* Log Area */
+
+        .log-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #terminal {
+            background-color: #050714;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #d1d1d1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .log-entry {
+            border-left: 2px solid transparent;
+            padding-left: 0.5rem;
+        }
+
+        .log-info { border-left-color: var(--accent-color); }
+
+        .log-error { border-left-color: var(--error-color); color: var(--error-color); }
+
+        .log-warn { border-left-color: var(--warning-color); color: var(--warning-color); }
+
+        .log-hex { color: var(--accent-color); }
+
+        /* Progress Bar */
+
+        .progress-wrapper {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Toast */
+
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        /* Responsive */
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Overlay for "Avvicina carta" */
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .overlay-content {
+            max-width: 400px;
+        }
+
+        .nfc-animation {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--accent-color);
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 255, 157, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+
+        /* Login Overlay */
+
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            text-align: center;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background: #050714;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: white;
+            font-family: var(--font-mono);
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            outline: none;
+        }
+
+        .login-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .login-logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .login-logo span {
+            color: var(--accent-color);
+        }
+
+        #main-app {
+            display: none;
+        }
+
+        /* Dashboard */
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .dash-btn {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            gap: 1rem;
+        }
+
+        .dash-btn:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-glow);
+            color: var(--accent-color);
+        }
+
+        .dash-btn .icon {
+            font-size: 3rem;
+        }
+
+        .dash-btn .label {
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-bar {
+            max-width: 1200px;
+            margin: 1rem auto 0;
+            padding: 0 1rem;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-XJr4SWi4.js"></script>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <div class="login-logo">MACO <span>LAB.</span></div>
+            <div class="nfc-animation" style="margin-bottom: 1.5rem; width: 60px; height: 60px;"></div>
+            <h2 style="margin-bottom: 1.5rem; color: var(--accent-color); font-size: 1rem; opacity: 0.8;">ACCESSO RISERVATO</h2>
+            <input type="password" id="login-pass" class="login-input" placeholder="PASSWORD">
+            <button id="btn-login" class="btn btn-large">ENTRA</button>
+            <div id="login-error" style="color: var(--error-color); margin-top: 1rem; font-size: 0.8rem; display: none;">Password errata!</div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page active">
+            <header>
+                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.2rem;">MACO <span>LAB.</span></div>
+                <div style="font-size: 0.7rem; color: var(--accent-color); letter-spacing: 0.3em; margin-bottom: 1rem; opacity: 0.8; font-weight: 700;">CHAMELEON ULTRA TOOL</div>
+                <h1>Seleziona Tipologia Tag</h1>
+                <div class="status-bar">
+                    <div id="connection-led" class="led"></div>
+                    <span id="connection-status" class="status-text">DISCONNESSO</span>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 1rem;">
+                    <button id="btn-connect" class="btn">🔵 Connetti Chameleon (BLE)</button>
+                    <button id="btn-disconnect" class="btn btn-danger" style="display: none;">Disconnetti</button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="dash-btn" onclick="showPage('page-microel')">
+                    <div class="icon">💳</div>
+                    <div class="label">Microel</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-comestero')">
+                    <div class="icon">💳</div>
+                    <div class="label">Comestero</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-trea')">
+                    <div class="icon">💳</div>
+                    <div class="label">Trea</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-mizip')">
+                    <div class="icon">🔑</div>
+                    <div class="label">MiZip</div>
+                </div>
+                <div class="dash-btn" onclick="showPage('page-ybb')">
+                    <div class="icon">🔑</div>
+                    <div class="label">YBB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MICROEL PAGE -->
+        <div id="page-microel" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Microel Manager</h1>
+                <div id="device-info" class="status-text" style="margin-bottom: 1rem; display: none;">
+                    Dispositivo: <span id="device-name" style="color: var(--accent-color)">-</span> | 
+                    Firmware: <span id="fw-version" style="color: var(--accent-color)">-</span>
+                </div>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid">-</td></tr>
+                            <tr><td>KeyA Generata</td><td id="res-keya">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit">-</td></tr>
+                            <tr><td>Credito Prec.</td><td id="res-prev-credit">-</td></tr>
+                            <tr><td>Checksum</td><td id="res-checksum">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA</div>
+                    <div class="recharge-grid">
+                        <div class="recharge-option active" data-amount="5">5€</div>
+                        <div class="recharge-option" data-amount="10">10€</div>
+                        <div class="recharge-option" data-amount="20">20€</div>
+                        <div class="recharge-option" data-amount="30">30€</div>
+                        <div class="recharge-option" data-amount="50">50€</div>
+                    </div>
+                    <button id="btn-recharge" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMESTERO PAGE -->
+        <div id="page-comestero" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Comestero Manager</h1>
+            </header>
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info-comestero" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results-comestero" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid-comestero">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit-comestero">-</td></tr>
+                            <tr><td>Credito Prec.</td><td id="res-prev-credit-comestero">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA</div>
+                    <div class="recharge-grid">
+                        <div class="recharge-option-comestero active" data-amount="500">5€</div>
+                        <div class="recharge-option-comestero" data-amount="1000">10€</div>
+                        <div class="recharge-option-comestero" data-amount="2000">20€</div>
+                        <div class="recharge-option-comestero" data-amount="5000">50€</div>
+                    </div>
+                    <button id="btn-recharge-comestero" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset-comestero" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+
+                <!-- CARD 4: GOD MODE -->
+                <div class="card">
+                    <div class="card-title">⚡ GOD MODE</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-god-activate" class="btn btn-large" disabled>ATTIVA</button>
+                        <button id="btn-god-deactivate" class="btn btn-large btn-danger" disabled>TOGLI</button>
+                    </div>
+                </div>
+
+                <!-- CARD 5: AGGIUNGI NUOVA CARTA -->
+                <div class="card">
+                    <div class="card-title">➕ AGGIUNGI NUOVA CARTA</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="input-group">
+                            <label class="input-label">Nome (es. PERSONALE)</label>
+                            <input type="text" id="new-comestero-name" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="Nome identificativo">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">UID (es. F34883EC)</label>
+                            <input type="text" id="new-comestero-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Key0 (es. 4AF6F3C140CD)</label>
+                            <input type="text" id="new-comestero-key0" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">KeyUid (es. 48C4ECD2337D)</label>
+                            <input type="text" id="new-comestero-keyuid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <button id="btn-add-comestero-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
+                    </div>
+                    <div id="user-comestero-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Lista carte aggiunte -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TREA PAGE (Placeholder) -->
+        <div id="page-trea" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Trea Manager</h1>
+                <div id="trea-device-info" class="status-text" style="margin-bottom: 1rem; display: none;">
+                    Dispositivo: <span id="trea-device-name" style="color: var(--accent-color)">-</span>
+                </div>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: INFO CARTA -->
+                <div class="card">
+                    <div class="card-title">📊 INFO CARTA</div>
+                    <button id="btn-read-info-trea" class="btn btn-large" disabled>🔍 LEGGI INFO CARTA</button>
+                    <div id="info-results-trea" style="display: none;">
+                        <table class="info-table">
+                            <tr><td>UID</td><td id="res-uid-trea">-</td></tr>
+                            <tr><td>Tipo Carta</td><td id="res-type-trea">-</td></tr>
+                            <tr><td>Credito Attuale</td><td id="res-credit-trea">-</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: RICARICA -->
+                <div class="card">
+                    <div class="card-title">💰 RICARICA (55€)</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Carica l'importo fisso di 55.00€.</p>
+                    <button id="btn-recharge-trea" class="btn btn-large" disabled>💳 RICARICA</button>
+                </div>
+
+                <!-- CARD 3: RESET -->
+                <div class="card">
+                    <div class="card-title">🔄 RESET</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Azzera il credito della carta a 0.00€.</p>
+                    <button id="btn-reset-trea" class="btn btn-large btn-danger" disabled>⚠️ AZZERA CREDITO</button>
+                </div>
+
+                <!-- CARD 4: AGGIUNGI NUOVA CARTA -->
+                <div class="card">
+                    <div class="card-title">➕ AGGIUNGI NUOVA CARTA</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="input-group">
+                            <label class="input-label">Nome (es. PERSONALE)</label>
+                            <input type="text" id="new-trea-name" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="Nome identificativo">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">UID (es. D7A2DD6E)</label>
+                            <input type="text" id="new-trea-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Key6 (es. 26F330C35759)</label>
+                            <input type="text" id="new-trea-key6" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
+                        </div>
+                        <button id="btn-add-trea-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
+                    </div>
+                    <div id="user-trea-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Lista carte aggiunte -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIZIP PAGE -->
+        <div id="page-mizip" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>MiZip Manager</h1>
+            </header>
+            <div class="container">
+                <div class="card">
+                    <div class="card-title">📊 OPERAZIONI CHIAVE</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-large" onclick="mizipInfo()">🔍 INFO CREDITO</button>
+                        <button class="btn btn-large" onclick="mizipCharge()">💰 RICARICA +5.12€</button>
+                        <button class="btn btn-large btn-danger" onclick="mizipReset()">🔄 RESET CHIAVE</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 LOG OPERAZIONI</div>
+                    <div id="mizip-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- YBB PAGE -->
+        <div id="page-ybb" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+            </div>
+            <header>
+                <h1>YBB Manager</h1>
+            </header>
+            <div class="container">
+                <div class="card">
+                    <div class="card-title">📊 OPERAZIONI CHIAVE</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-large" onclick="ybbInfo()">🔍 INFO CREDITO</button>
+                        <button class="btn btn-large" onclick="ybbCharge()">💰 RICARICA +5.00€</button>
+                        <button class="btn btn-large btn-danger" onclick="ybbReset()">🔄 RESET CREDITO</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 LOG OPERAZIONI</div>
+                    <div id="ybb-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <div class="log-header">
+                <span>Console Log</span>
+                <span id="clear-log" style="cursor: pointer; text-decoration: underline;">Pulisci</span>
+            </div>
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div class="overlay-content">
+            <div class="nfc-animation"></div>
+            <h2 id="overlay-title" style="margin-bottom: 1rem;">Avvicina la carta</h2>
+            <p id="overlay-msg" style="color: var(--text-secondary);">Il ChameleonUltra è in attesa di un tag HF 14443A...</p>
+            <button id="btn-cancel-op" class="btn btn-danger" style="margin-top: 2rem;">Annulla</button>
+        </div>
+    </div>
+
+    <div id="toast">Operazione completata!</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chameleon-ultra.js@0.4.1/dist/index.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chameleon-ultra.js@0.4.1/dist/plugin/WebbleAdapter.global.js"></script>
+</body>
+</html>
