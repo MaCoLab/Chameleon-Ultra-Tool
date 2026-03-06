@@ -490,7 +490,7 @@
             padding: 0 1rem;
         }
     </style>
-  <script type="module" crossorigin src="/assets/index-XJr4SWi4.js"></script>
+  <script type="module" crossorigin src="/assets/index-CHZji7LI.js"></script>
 </head>
 <body>
 
@@ -509,9 +509,8 @@
         <!-- DASHBOARD PAGE -->
         <div id="page-dashboard" class="page active">
             <header>
-                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.2rem;">MACO <span>LAB.</span></div>
-                <div style="font-size: 0.7rem; color: var(--accent-color); letter-spacing: 0.3em; margin-bottom: 1rem; opacity: 0.8; font-weight: 700;">CHAMELEON ULTRA TOOL</div>
-                <h1>Seleziona Tipologia Tag</h1>
+                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.5rem;">MACO <span>LAB.</span></div>
+                <h1>Seleziona Sistema</h1>
                 <div class="status-bar">
                     <div id="connection-led" class="led"></div>
                     <span id="connection-status" class="status-text">DISCONNESSO</span>
@@ -543,13 +542,17 @@
                     <div class="icon">🔑</div>
                     <div class="label">YBB</div>
                 </div>
+                <div class="dash-btn" onclick="showPage('page-toolkit')">
+                    <div class="icon">🛠️</div>
+                    <div class="label">Toolkit</div>
+                </div>
             </div>
         </div>
 
         <!-- MICROEL PAGE -->
         <div id="page-microel" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Microel Manager</h1>
@@ -600,7 +603,7 @@
         <!-- COMESTERO PAGE -->
         <div id="page-comestero" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Comestero Manager</h1>
@@ -660,11 +663,11 @@
                             <input type="text" id="new-comestero-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
                         </div>
                         <div class="input-group">
-                            <label class="input-label">Key0 (es. 4AF6F3C140CD)</label>
+                            <label class="input-label">Key0B (es. 4AF6F3C140CD)</label>
                             <input type="text" id="new-comestero-key0" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
                         </div>
                         <div class="input-group">
-                            <label class="input-label">KeyUid (es. 48C4ECD2337D)</label>
+                            <label class="input-label">Key2B (es. 48C4ECD2337D)</label>
                             <input type="text" id="new-comestero-keyuid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
                         </div>
                         <button id="btn-add-comestero-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
@@ -676,10 +679,10 @@
             </div>
         </div>
 
-        <!-- TREA PAGE (Placeholder) -->
+        <!-- TREA PAGE -->
         <div id="page-trea" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Trea Manager</h1>
@@ -744,7 +747,7 @@
         <!-- MIZIP PAGE -->
         <div id="page-mizip" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>MiZip Manager</h1>
@@ -769,7 +772,7 @@
         <!-- YBB PAGE -->
         <div id="page-ybb" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>YBB Manager</h1>
@@ -787,6 +790,75 @@
                 <div class="card">
                     <div class="card-title">📝 LOG OPERAZIONI</div>
                     <div id="ybb-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLKIT PAGE -->
+        <div id="page-toolkit" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Toolkit Mifare</h1>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: Archivio Chiavi (versione con copia/incolla) -->
+                <div class="card">
+                    <div class="card-title">🔑 Archivio Chiavi</div>
+                    
+                    <!-- Area di inserimento rapido -->
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size:0.8rem; color:var(--text-secondary);">Incolla qui l'elenco delle chiavi (formato: settore keyA keyB)</label>
+                        <textarea id="key-bulk-input" rows="5" class="btn" style="width:100%; text-align:left; font-family:var(--font-mono); font-size:0.8rem; background:rgba(255,255,255,0.05); resize:vertical; padding:0.5rem;" placeholder="Esempio:
+0 FFFFFFFFFFFF FFFFFFFFFFFF
+1 A1B2C3D4E5F6 7890ABCDEF12
+..."></textarea>
+                        <button id="btn-import-bulk" class="btn btn-large" style="margin-top:0.5rem; background:var(--accent-color); color:white;">📋 IMPORTA DA ELENCO</button>
+                        <button id="btn-clear-archive" class="btn btn-large btn-danger" style="margin-top:0.5rem;">🗑️ SVUOTA ARCHIVIO</button>
+                    </div>
+
+                    <!-- Inserimento manuale (opzionale) -->
+                    <details style="margin-bottom:1rem;">
+                        <summary style="cursor:pointer; color:var(--accent-color);">➕ Aggiungi manualmente</summary>
+                        <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top:1rem;">
+                            <input type="text" id="key-name" placeholder="Nome (es. Settore 0)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <input type="number" id="key-sector" placeholder="Settore (0-15)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" min="0" max="15">
+                            <input type="text" id="key-a" placeholder="Key A (12 hex, es. FFFFFFFFFFFF)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <input type="text" id="key-b" placeholder="Key B (12 hex, es. FFFFFFFFFFFF)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <button id="btn-add-key" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA CHIAVE</button>
+                        </div>
+                    </details>
+
+                    <!-- Lista chiavi salvate -->
+                    <div id="key-archive-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Le chiavi verranno elencate qui -->
+                    </div>
+                </div>
+
+                <!-- CARD 2: Esporta Dump -->
+                <div class="card">
+                    <div class="card-title">💾 Esporta Dump</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Legge tutti i blocchi (0-63) e salva un file .bin</p>
+                    <button id="btn-export-dump" class="btn btn-large">⬇️ ESPORTA DUMP</button>
+                </div>
+
+                <!-- CARD 3: Carica Dump -->
+                <div class="card">
+                    <div class="card-title">📂 Carica Dump</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Seleziona un file .bin da scrivere sulla carta</p>
+                    <input type="file" id="dump-file" accept=".bin" style="display: none;">
+                    <button id="btn-choose-file" class="btn btn-large" onclick="document.getElementById('dump-file').click()">📁 SCEGLI FILE</button>
+                    <button id="btn-write-dump" class="btn btn-large" style="margin-top: 0.5rem;">✍️ SCRIVI DUMP</button>
+                    <div id="dump-progress" style="margin-top: 1rem; font-size: 0.8rem;"></div>
+                </div>
+
+                <!-- CARD 4: Invergina Carta -->
+                <div class="card">
+                    <div class="card-title">🧹 Invergina Carta</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Resetta la carta a stato di fabbrica (dati zero, chiavi default)</p>
+                    <button id="btn-wipe-card" class="btn btn-large btn-danger">⚠️ INVERGINA CARTA</button>
                 </div>
             </div>
         </div>
