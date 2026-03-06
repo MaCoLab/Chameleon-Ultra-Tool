@@ -493,9 +493,8 @@
         <!-- DASHBOARD PAGE -->
         <div id="page-dashboard" class="page active">
             <header>
-                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.2rem;">MACO <span>LAB.</span></div>
-                <div style="font-size: 0.7rem; color: var(--accent-color); letter-spacing: 0.3em; margin-bottom: 1rem; opacity: 0.8; font-weight: 700;">CHAMELEON ULTRA TOOL</div>
-                <h1>Seleziona Tipologia Tag</h1>
+                <div class="login-logo" style="font-size: 1.8rem; margin-bottom: 0.5rem;">MACO <span>LAB.</span></div>
+                <h1>Seleziona Sistema</h1>
                 <div class="status-bar">
                     <div id="connection-led" class="led"></div>
                     <span id="connection-status" class="status-text">DISCONNESSO</span>
@@ -527,13 +526,17 @@
                     <div class="icon">🔑</div>
                     <div class="label">YBB</div>
                 </div>
+                <div class="dash-btn" onclick="showPage('page-toolkit')">
+                    <div class="icon">🛠️</div>
+                    <div class="label">Toolkit</div>
+                </div>
             </div>
         </div>
 
         <!-- MICROEL PAGE -->
         <div id="page-microel" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Microel Manager</h1>
@@ -584,7 +587,7 @@
         <!-- COMESTERO PAGE -->
         <div id="page-comestero" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Comestero Manager</h1>
@@ -644,11 +647,11 @@
                             <input type="text" id="new-comestero-uid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="8 caratteri hex">
                         </div>
                         <div class="input-group">
-                            <label class="input-label">Key0 (es. 4AF6F3C140CD)</label>
+                            <label class="input-label">Key0B (es. 4AF6F3C140CD)</label>
                             <input type="text" id="new-comestero-key0" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
                         </div>
                         <div class="input-group">
-                            <label class="input-label">KeyUid (es. 48C4ECD2337D)</label>
+                            <label class="input-label">Key2B (es. 48C4ECD2337D)</label>
                             <input type="text" id="new-comestero-keyuid" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" placeholder="12 caratteri hex">
                         </div>
                         <button id="btn-add-comestero-card" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA NUOVA CARTA</button>
@@ -660,10 +663,10 @@
             </div>
         </div>
 
-        <!-- TREA PAGE (Placeholder) -->
+        <!-- TREA PAGE -->
         <div id="page-trea" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>Trea Manager</h1>
@@ -728,7 +731,7 @@
         <!-- MIZIP PAGE -->
         <div id="page-mizip" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>MiZip Manager</h1>
@@ -753,7 +756,7 @@
         <!-- YBB PAGE -->
         <div id="page-ybb" class="page">
             <div class="back-bar">
-                <button class="btn" onclick="showPage('page-dashboard')">⬅️ Torna al Menu</button>
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
             </div>
             <header>
                 <h1>YBB Manager</h1>
@@ -771,6 +774,75 @@
                 <div class="card">
                     <div class="card-title">📝 LOG OPERAZIONI</div>
                     <div id="ybb-log" class="log-view" style="min-height: 100px; font-size: 0.9rem;">In attesa di operazioni...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLKIT PAGE -->
+        <div id="page-toolkit" class="page">
+            <div class="back-bar">
+                <button class="btn" onclick="showPage('page-dashboard')">&larr; Torna al Menu</button>
+            </div>
+            <header>
+                <h1>Toolkit Mifare</h1>
+            </header>
+
+            <div class="container">
+                <!-- CARD 1: Archivio Chiavi (versione con copia/incolla) -->
+                <div class="card">
+                    <div class="card-title">🔑 Archivio Chiavi</div>
+                    
+                    <!-- Area di inserimento rapido -->
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size:0.8rem; color:var(--text-secondary);">Incolla qui l'elenco delle chiavi (formato: settore keyA keyB)</label>
+                        <textarea id="key-bulk-input" rows="5" class="btn" style="width:100%; text-align:left; font-family:var(--font-mono); font-size:0.8rem; background:rgba(255,255,255,0.05); resize:vertical; padding:0.5rem;" placeholder="Esempio:
+0 FFFFFFFFFFFF FFFFFFFFFFFF
+1 A1B2C3D4E5F6 7890ABCDEF12
+..."></textarea>
+                        <button id="btn-import-bulk" class="btn btn-large" style="margin-top:0.5rem; background:var(--accent-color); color:white;">📋 IMPORTA DA ELENCO</button>
+                        <button id="btn-clear-archive" class="btn btn-large btn-danger" style="margin-top:0.5rem;">🗑️ SVUOTA ARCHIVIO</button>
+                    </div>
+
+                    <!-- Inserimento manuale (opzionale) -->
+                    <details style="margin-bottom:1rem;">
+                        <summary style="cursor:pointer; color:var(--accent-color);">➕ Aggiungi manualmente</summary>
+                        <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top:1rem;">
+                            <input type="text" id="key-name" placeholder="Nome (es. Settore 0)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <input type="number" id="key-sector" placeholder="Settore (0-15)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);" min="0" max="15">
+                            <input type="text" id="key-a" placeholder="Key A (12 hex, es. FFFFFFFFFFFF)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <input type="text" id="key-b" placeholder="Key B (12 hex, es. FFFFFFFFFFFF)" class="btn" style="text-align: left; cursor: text; background: rgba(255,255,255,0.05);">
+                            <button id="btn-add-key" class="btn btn-large" style="background: var(--accent-color); color: white;">SALVA CHIAVE</button>
+                        </div>
+                    </details>
+
+                    <!-- Lista chiavi salvate -->
+                    <div id="key-archive-list" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                        <!-- Le chiavi verranno elencate qui -->
+                    </div>
+                </div>
+
+                <!-- CARD 2: Esporta Dump -->
+                <div class="card">
+                    <div class="card-title">💾 Esporta Dump</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Legge tutti i blocchi (0-63) e salva un file .bin</p>
+                    <button id="btn-export-dump" class="btn btn-large">⬇️ ESPORTA DUMP</button>
+                </div>
+
+                <!-- CARD 3: Carica Dump -->
+                <div class="card">
+                    <div class="card-title">📂 Carica Dump</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Seleziona un file .bin da scrivere sulla carta</p>
+                    <input type="file" id="dump-file" accept=".bin" style="display: none;">
+                    <button id="btn-choose-file" class="btn btn-large" onclick="document.getElementById('dump-file').click()">📁 SCEGLI FILE</button>
+                    <button id="btn-write-dump" class="btn btn-large" style="margin-top: 0.5rem;">✍️ SCRIVI DUMP</button>
+                    <div id="dump-progress" style="margin-top: 1rem; font-size: 0.8rem;"></div>
+                </div>
+
+                <!-- CARD 4: Invergina Carta -->
+                <div class="card">
+                    <div class="card-title">🧹 Invergina Carta</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Resetta la carta a stato di fabbrica (dati zero, chiavi default)</p>
+                    <button id="btn-wipe-card" class="btn btn-large btn-danger">⚠️ INVERGINA CARTA</button>
                 </div>
             </div>
         </div>
@@ -886,7 +958,6 @@
 
         // --- STATO APPLICAZIONE ---
         const ultra = new ChameleonUltra();
-        // L'installazione dell'adapter è asincrona
         const adapterPromise = ultra.use(new WebbleAdapter());
         let isConnected = false;
         let selectedAmount = 5;
@@ -966,34 +1037,142 @@
             return { keysA, keysB };
         }
 
+        async function scanTag() {
+            try {
+                const tags = await ultra.cmdHf14aScan();
+                if (tags && tags.length > 0) {
+                    return Buffer.from(tags[0].uid);
+                }
+            } catch (e) {
+                // ignora errori di scansione
+            }
+            return null;
+        }
+
+        async function reselectTag() {
+            try {
+                try {
+                    await ultra.cmdHf14aHalt();
+                } catch (e) { /* ignora */ }
+                await new Promise(r => setTimeout(r, 50));
+                const tags = await ultra.cmdHf14aScan();
+                if (tags && tags.length > 0) {
+                    return Buffer.from(tags[0].uid);
+                }
+            } catch (e) {
+                log(`Errore in reselectTag: ${e.message}`, 'error');
+            }
+            return null;
+        }
+
+        // --- INFO MIZIP ---
         async function mizipInfo() {
             const logEl = document.getElementById('mizip-log');
             logEl.innerHTML = "Avvicina la chiave MiZIP...";
             
             try {
-                const uid = await ultra.getUid();
-                logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
+                let uid = await readTagUID();
+                const uidHex = uid.toString('hex').toUpperCase();
+                logEl.innerHTML += `<br>UID: ${uidHex}`;
+                log(`UID letto: ${uidHex}`, 'info');
                 
-                const { keysB } = generateMizipKeys(uid);
+                const { keysA, keysB } = generateMizipKeys(uid);
+                const keyB2 = Buffer.from(keysB[1]);  // settore 2, Key B
+                const keyA2 = Buffer.from(keysA[1]);  // settore 2, Key A
+                const keyDefault = Buffer.alloc(6, 0xFF);
                 
-                // Auth settore 2 (blocco 8) con Key B
-                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
-                const block10 = await ultra.mf1Read(10);
+                log(`KeyB[2]: ${keyB2.toString('hex').toUpperCase()}`, 'hex');
+                log(`KeyA[2]: ${keyA2.toString('hex').toUpperCase()}`, 'hex');
+                log(`KeyDefault: ${keyDefault.toString('hex').toUpperCase()}`, 'hex');
+                
+                let block10;
+                let success = false;
+                let winner = null;
+                let winnerKey = null;
+                let winnerType = null;
+
+                const attempts = [
+                    { key: keyB2, type: 0x61, label: "Key B (Custom)" },
+                    { key: keyA2, type: 0x60, label: "Key A (Custom)" },
+                    { key: keyDefault, type: 0x61, label: "Key B (Default)" },
+                    { key: keyDefault, type: 0x60, label: "Key A (Default)" }
+                ];
+
+                for (const attempt of attempts) {
+                    log(`Tentativo: ${attempt.label} con chiave ${attempt.key.toString('hex').toUpperCase()}`, 'info');
+                    
+                    const currentUid = await reselectTag();
+                    if (!currentUid) {
+                        log("Nessun tag rilevato, attendi...", "warn");
+                        await new Promise(r => setTimeout(r, 300));
+                        continue;
+                    }
+                    
+                    if (currentUid.toString('hex') !== uid.toString('hex')) {
+                        log(`UID cambiato? Nuovo: ${currentUid.toString('hex').toUpperCase()}`, 'warn');
+                        uid = currentUid;
+                    }
+                    
+                    try {
+                        block10 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                            block: 10, 
+                            keyType: attempt.type, 
+                            key: attempt.key,
+                            uid: currentUid
+                        }));
+                        log(`Autenticato con successo: ${attempt.label}`, "info");
+                        log(`Blocco 10 letto: ${block10.toString('hex').toUpperCase()}`, 'hex');
+                        success = true;
+                        winner = attempt;
+                        winnerKey = attempt.key;
+                        winnerType = attempt.type;
+                        uid = currentUid;
+                        break;
+                    } catch (e) {
+                        log(`${attempt.label} fallito: ${e.message}`, "warn");
+                    }
+                }
+
+                if (!success) throw new Error("Impossibile autenticare il tag con nessuna chiave nota.");
                 
                 let currentBlock = 8;
                 let prevBlock = 9;
-                
                 if (block10[0] === 0xAA) {
                     currentBlock = 8; prevBlock = 9;
+                    log("Pointer AA → blocco corrente 8, precedente 9");
                 } else if (block10[0] === 0x55) {
                     currentBlock = 9; prevBlock = 8;
+                    log("Pointer 55 → blocco corrente 9, precedente 8");
+                } else {
+                    log(`Pointer sconosciuto: 0x${block10[0].toString(16)}`, 'warn');
                 }
                 
-                const dataCurr = await ultra.mf1Read(currentBlock);
-                const dataPrev = await ultra.mf1Read(prevBlock);
+                await new Promise(r => setTimeout(r, 150));
+                const currentUid2 = await reselectTag();
+                if (!currentUid2) throw new Error("Tag perso durante la lettura del blocco corrente.");
+                const dataCurr = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: currentBlock, 
+                    keyType: winnerType, 
+                    key: winnerKey,
+                    uid: currentUid2
+                }));
+                log(`Blocco ${currentBlock} letto: ${dataCurr.toString('hex').toUpperCase()}`, 'hex');
+                
+                await new Promise(r => setTimeout(r, 150));
+                const currentUid3 = await reselectTag();
+                if (!currentUid3) throw new Error("Tag perso durante la lettura del blocco precedente.");
+                const dataPrev = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: prevBlock, 
+                    keyType: winnerType, 
+                    key: winnerKey,
+                    uid: currentUid3
+                }));
+                log(`Blocco ${prevBlock} letto: ${dataPrev.toString('hex').toUpperCase()}`, 'hex');
                 
                 const credit = ((dataCurr[2] << 8) | dataCurr[1]) / 100;
                 const prevCredit = ((dataPrev[2] << 8) | dataPrev[1]) / 100;
+                
+                hideOverlay();
                 
                 logEl.innerHTML = `
                     <div style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 0.5rem;">CHIAVE RICONOSCIUTA</div>
@@ -1004,52 +1183,131 @@
                     </div>
                 `;
             } catch (e) {
+                hideOverlay();
                 logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
+                log(`Errore mizipInfo: ${e.message}`, 'error');
             }
         }
 
+        // --- RICARICA MIZIP ---
         async function mizipCharge() {
             const logEl = document.getElementById('mizip-log');
             logEl.innerHTML = "Preparazione ricarica...";
             
             try {
-                const uid = await ultra.getUid();
-                const { keysB } = generateMizipKeys(uid);
+                let uid = await readTagUID();
+                logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
                 
-                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
-                const block10 = await ultra.mf1Read(10);
+                const { keysA, keysB } = generateMizipKeys(uid);
+                const keyB2 = Buffer.from(keysB[1]);
+                const keyA2 = Buffer.from(keysA[1]);
+                const keyDefault = Buffer.alloc(6, 0xFF);
+                
+                let block10;
+                let winner = null;
+                let winnerKey = null;
+                let winnerType = null;
+
+                const attempts = [
+                    { key: keyB2, type: 0x61, label: "Key B (Custom)" },
+                    { key: keyA2, type: 0x60, label: "Key A (Custom)" },
+                    { key: keyDefault, type: 0x61, label: "Key B (Default)" }
+                ];
+
+                for (const attempt of attempts) {
+                    log(`Tentativo auth: ${attempt.label}...`);
+                    const currentUid = await scanTag();
+                    if (!currentUid) {
+                        await new Promise(r => setTimeout(r, 200));
+                        continue;
+                    }
+                    try {
+                        block10 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                            block: 10, 
+                            keyType: attempt.type, 
+                            key: attempt.key,
+                            uid: currentUid
+                        }));
+                        winner = attempt;
+                        winnerKey = attempt.key;
+                        winnerType = attempt.type;
+                        uid = currentUid;
+                        log(`Auth riuscita: ${attempt.label}`, "info");
+                        break;
+                    } catch (e) {
+                        log(`${attempt.label} fallito.`, "warn");
+                    }
+                }
+
+                if (!winner) throw new Error("Auth fallito durante ricarica.");
                 
                 let currentBlock = 8;
                 let prevBlock = 9;
-                if (block10[0] === 0xAA) { currentBlock = 8; prevBlock = 9; }
-                else if (block10[0] === 0x55) { currentBlock = 9; prevBlock = 8; }
+                if (block10[0] === 0xAA) {
+                    currentBlock = 8; prevBlock = 9;
+                } else if (block10[0] === 0x55) {
+                    currentBlock = 9; prevBlock = 8;
+                }
                 
-                const dataCurr = await ultra.mf1Read(currentBlock);
+                await new Promise(r => setTimeout(r, 100));
+                const currentUid2 = await scanTag();
+                if (!currentUid2) throw new Error("Tag perso.");
+                const dataCurr = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: currentBlock, 
+                    keyType: winnerType, 
+                    key: winnerKey,
+                    uid: currentUid2
+                }));
                 const oldData = Buffer.from(dataCurr);
                 
-                // Incremento credito (+5.12€ come da esempio C++)
                 dataCurr[2] += 0x02;
-                dataCurr[3] = dataCurr[1] ^ dataCurr[2]; // Checksum mode
+                dataCurr[3] = dataCurr[1] ^ dataCurr[2];
                 
-                await ultra.mf1Write(currentBlock, dataCurr);
-                await ultra.mf1Write(prevBlock, oldData);
+                await new Promise(r => setTimeout(r, 150));
+                const currentUid3 = await scanTag();
+                if (!currentUid3) throw new Error("Tag perso.");
+                await ultra.cmdMf1WriteBlock({ 
+                    block: currentBlock, 
+                    keyType: winnerType, 
+                    key: winnerKey, 
+                    data: dataCurr,
+                    uid: currentUid3
+                });
+                
+                await new Promise(r => setTimeout(r, 150));
+                const currentUid4 = await scanTag();
+                if (!currentUid4) throw new Error("Tag perso.");
+                await ultra.cmdMf1WriteBlock({ 
+                    block: prevBlock, 
+                    keyType: winnerType, 
+                    key: winnerKey, 
+                    data: oldData,
+                    uid: currentUid4
+                });
                 
                 const newCredit = ((dataCurr[2] << 8) | dataCurr[1]) / 100;
+                hideOverlay();
                 logEl.innerHTML = `<span style="color: var(--accent-color)">RICARICA COMPLETATA!</span><br>Nuovo Credito: € ${newCredit.toFixed(2)}`;
                 showToast('Ricarica completata');
             } catch (e) {
+                hideOverlay();
                 logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
             }
         }
 
+        // --- RESET MIZIP ---
         async function mizipReset() {
             const logEl = document.getElementById('mizip-log');
             logEl.innerHTML = "Reset in corso...";
             
             try {
-                const uid = await ultra.getUid();
-                const { keysB } = generateMizipKeys(uid);
+                const uid = await readTagUID();
+                logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
                 
+                const { keysB } = generateMizipKeys(uid);
+                const keyB1 = Buffer.from(keysB[0]);  // settore 1
+                const keyB2 = Buffer.from(keysB[1]);  // settore 2
+
                 const settori = [
                     Buffer.from([0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00]),
                     Buffer.from([0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01]),
@@ -1058,25 +1316,36 @@
                     Buffer.from([0x55, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
                 ];
 
-                // Auth Settore 1
-                await ultra.mf1Auth(4, 1, Buffer.from(keysB[1]));
-                await ultra.mf1Write(4, settori[0]);
-                await ultra.mf1Write(5, settori[1]);
-                await ultra.mf1Write(6, settori[4]);
+                const writeBlock = async (block, key, data) => {
+                    await new Promise(r => setTimeout(r, 150));
+                    const currentUid = await scanTag();
+                    if (!currentUid) throw new Error(`Tag perso durante scrittura blocco ${block}`);
+                    await ultra.cmdMf1WriteBlock({ 
+                        block: block, 
+                        keyType: 0x61, 
+                        key: key, 
+                        data: data,
+                        uid: currentUid
+                    });
+                };
 
-                // Auth Settore 2
-                await ultra.mf1Auth(8, 1, Buffer.from(keysB[2]));
-                await ultra.mf1Write(8, settori[2]);
-                await ultra.mf1Write(9, settori[3]);
-                await ultra.mf1Write(10, settori[4]);
-
+                await writeBlock(4, keyB1, settori[0]);
+                await writeBlock(5, keyB1, settori[1]);
+                await writeBlock(6, keyB1, settori[4]);
+                
+                await writeBlock(8, keyB2, settori[2]);
+                await writeBlock(9, keyB2, settori[3]);
+                await writeBlock(10, keyB2, settori[4]);
+                
+                hideOverlay();
                 logEl.innerHTML = `<span style="color: var(--accent-color)">RESET COMPLETATO!</span><br>Credito riportato a € 0.00`;
                 showToast('Reset completato');
             } catch (e) {
+                hideOverlay();
                 logEl.innerHTML = `<span style="color: var(--error-color)">Errore: ${e.message}</span>`;
             }
         }
-
+        
         // --- GESTIONE YBB ---
         const YBB_KEY_B = Buffer.from([0x64, 0xD3, 0xC9, 0xEE, 0x7C, 0x3D]);
         const YBB_BLOCK_CREDIT = 6;
@@ -1086,12 +1355,15 @@
             logEl.innerHTML = "Avvicina il tag YBB...";
             
             try {
-                const uid = await ultra.getUid();
+                const uid = await readTagUID();
                 logEl.innerHTML += `<br>UID: ${uid.toString('hex').toUpperCase()}`;
                 
-                // Auth blocco 6 con Key B
-                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
-                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                const data = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: YBB_BLOCK_CREDIT, 
+                    keyType: 0x61, 
+                    key: YBB_KEY_B,
+                    uid: uid
+                }));
                 
                 const credit = ((data[1] << 8) | data[2]) / 100;
                 
@@ -1112,17 +1384,27 @@
             logEl.innerHTML = "Preparazione ricarica...";
             
             try {
-                const uid = await ultra.getUid();
-                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
-                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                const uid = await readTagUID();
+                const data = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: YBB_BLOCK_CREDIT, 
+                    keyType: 0x61, 
+                    key: YBB_KEY_B,
+                    uid: uid
+                }));
                 
                 let credit = (data[1] << 8) | data[2];
-                credit += 500; // +5.00€
+                credit += 500;
                 
                 data[1] = (credit >> 8) & 0xFF;
                 data[2] = credit & 0xFF;
                 
-                await ultra.mf1Write(YBB_BLOCK_CREDIT, data);
+                await ultra.cmdMf1WriteBlock({ 
+                    block: YBB_BLOCK_CREDIT, 
+                    keyType: 0x61, 
+                    key: YBB_KEY_B, 
+                    data: data,
+                    uid: uid
+                });
                 
                 logEl.innerHTML = `<span style="color: var(--accent-color)">RICARICA COMPLETATA!</span><br>Nuovo Credito: € ${(credit / 100).toFixed(2)}`;
                 showToast('Ricarica completata');
@@ -1136,14 +1418,24 @@
             logEl.innerHTML = "Reset credito...";
             
             try {
-                const uid = await ultra.getUid();
-                await ultra.mf1Auth(YBB_BLOCK_CREDIT, 1, YBB_KEY_B);
-                const data = await ultra.mf1Read(YBB_BLOCK_CREDIT);
+                const uid = await readTagUID();
+                const data = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: YBB_BLOCK_CREDIT, 
+                    keyType: 0x61, 
+                    key: YBB_KEY_B,
+                    uid: uid
+                }));
                 
                 data[1] = 0x00;
                 data[2] = 0x00;
                 
-                await ultra.mf1Write(YBB_BLOCK_CREDIT, data);
+                await ultra.cmdMf1WriteBlock({ 
+                    block: YBB_BLOCK_CREDIT, 
+                    keyType: 0x61, 
+                    key: YBB_KEY_B, 
+                    data: data,
+                    uid: uid
+                });
                 
                 logEl.innerHTML = `<span style="color: var(--accent-color)">RESET COMPLETATO!</span><br>Credito riportato a € 0.00`;
                 showToast('Reset completato');
@@ -1153,6 +1445,13 @@
         }
 
         // --- GESTIONE NAVIGAZIONE ---
+        window.mizipInfo = mizipInfo;
+        window.mizipCharge = mizipCharge;
+        window.mizipReset = mizipReset;
+        window.ybbInfo = ybbInfo;
+        window.ybbCharge = ybbCharge;
+        window.ybbReset = ybbReset;
+
         window.showPage = function(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -1188,7 +1487,6 @@
 
         // Check Bluetooth Support
         window.addEventListener('DOMContentLoaded', async () => {
-            // Verifica Browser
             const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
             const isEdge = /Edg/.test(navigator.userAgent);
             
@@ -1388,7 +1686,6 @@
 
                 log('Richiesta permessi Bluetooth...');
                 
-                // Verifica disponibilità hardware
                 if (navigator.bluetooth.getAvailability) {
                     const available = await navigator.bluetooth.getAvailability();
                     if (!available) {
@@ -1396,7 +1693,6 @@
                     }
                 }
 
-                // Chiamata esplicita a connect() che attiva il selettore di dispositivi
                 log('Seleziona il tuo ChameleonUltra dalla lista che apparirà...', 'info');
                 await ultra.connect();
                 
@@ -1445,8 +1741,6 @@
 
         async function disconnect() {
             try {
-                // The adapter handles disconnection when the device is lost or manually closed
-                // In chameleon-ultra.js, we can just reset our state as the adapter manages the physical link
                 isConnected = false;
                 led.classList.remove('connected');
                 statusText.textContent = 'DISCONNESSO';
@@ -1482,10 +1776,7 @@
             setTimeout(() => toast.style.display = 'none', 3000);
         }
 
-        // --- OPERAZIONI CARTE ---
-
         // --- SELEZIONE IMPORTI ---
-        // Utilizziamo la delegazione degli eventi per maggiore robustezza
         document.addEventListener('click', (e) => {
             const opt = e.target.closest('.recharge-option');
             if (opt) {
@@ -1509,24 +1800,22 @@
         async function readTagUID() {
             showOverlay('Avvicina la carta', 'In attesa di un tag HF 14443A...');
             const startTime = Date.now();
-            const timeout = 30000; // 30s
+            const timeout = 30000;
             try {
                 while (Date.now() - startTime < timeout) {
-                    // Check if user cancelled via overlay hide
                     if (overlay.style.display === 'none') throw new Error('Operazione annullata');
                     
                     try {
-                        // In v0.4.1, cmdHf14aScan returns an array of Hf14aAntiColl objects
                         const tags = await ultra.cmdHf14aScan();
                         if (tags && tags.length > 0) {
                             hideOverlay();
                             return Buffer.from(tags[0].uid);
                         }
                     } catch (scanErr) {
-                        // Ignore scan errors during polling (e.g. tag not found)
+                        // Ignore scan errors
                     }
                     
-                    await new Promise(r => setTimeout(r, 500)); // Wait 500ms before retry
+                    await new Promise(r => setTimeout(r, 500));
                 }
                 throw new Error('Timeout: nessuna carta rilevata.');
             } catch (e) {
@@ -1538,7 +1827,7 @@
             }
         }
 
-        // 1. LEGGI INFO CARTA
+        // --- OPERAZIONI MICROEL ---
         document.getElementById('btn-read-info').onclick = async () => {
             try {
                 const uid = await readTagUID();
@@ -1548,9 +1837,18 @@
                 logHex('KeyA generata', keyA);
 
                 log('Lettura dati carta...');
-                // Sector 1 starts at block 4
-                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
-                const block5 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 5, keyType: 0x60, key: keyA }));
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ 
+                    block: 4, 
+                    keyType: 0x60, 
+                    key: keyA,
+                    uid: uid
+                }));
+                const block5 = new Uint8Array(await ultra.cmdMf1ReadBlock({ 
+                    block: 5, 
+                    keyType: 0x60, 
+                    key: keyA,
+                    uid: uid
+                }));
                 
                 logHex('Blocco 4', block4);
                 logHex('Blocco 5', block5);
@@ -1572,6 +1870,74 @@
             }
         };
 
+        document.getElementById('btn-recharge').onclick = async () => {
+            try {
+                const uid = await readTagUID();
+                const keyA = generaKeyA(uid);
+                
+                log('Lettura credito attuale...');
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ 
+                    block: 4, 
+                    keyType: 0x60, 
+                    key: keyA,
+                    uid: uid
+                }));
+                const creditoAttuale = leggiCredito(block4);
+                
+                const nuovoCredito = creditoAttuale + (selectedAmount * 100);
+                log(`Credito attuale: ${creditoAttuale/100}€ -> Nuovo: ${nuovoCredito/100}€`);
+                
+                const nuovoBlock4 = Buffer.from(block4);
+                aggiornaCredito(nuovoBlock4, nuovoCredito);
+                
+                const nuovoBlock5 = Buffer.from(block4);
+                
+                log('Scrittura nuovi dati...');
+                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4, uid: uid });
+                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock5, uid: uid });
+                
+                log('Verifica...', 'info');
+                const verify = new Uint8Array(await ultra.cmdMf1ReadBlock({ 
+                    block: 4, 
+                    keyType: 0x60, 
+                    key: keyA,
+                    uid: uid
+                }));
+                if (leggiCredito(verify) === nuovoCredito) {
+                    showToast(`Ricarica di ${selectedAmount}€ effettuata!`);
+                    log('Ricarica completata con successo!');
+                } else {
+                    throw new Error('Verifica fallita dopo scrittura');
+                }
+            } catch (e) {
+                log(`Errore ricarica: ${e.message}`, 'error');
+            }
+        };
+
+        document.getElementById('btn-reset').onclick = async () => {
+            if (!confirm('Sei sicuro di voler azzerare il credito?')) return;
+
+            try {
+                const uid = await readTagUID();
+                const keyA = generaKeyA(uid);
+                
+                log('Lettura blocco 4...');
+                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
+                
+                log('Azzeramento credito...');
+                const nuovoBlock4 = Buffer.from(block4);
+                aggiornaCredito(nuovoBlock4, 0);
+                
+                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4, uid: uid });
+                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock4, uid: uid });
+                
+                showToast('Credito azzerato!');
+                log('Reset completato.');
+            } catch (e) {
+                log(`Errore reset: ${e.message}`, 'error');
+            }
+        };
+
         // --- GESTIONE TREA ---
         document.getElementById('btn-read-info-trea').onclick = async () => {
             try {
@@ -1583,12 +1949,15 @@
                 
                 log(`Carta riconosciuta: ${card.name}`);
                 log('Autenticazione Settore 0...');
-                // Authenticate Sector 0 (Block 3)
-                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0, uid: uid });
                 
                 log('Autenticazione Settore 6 e lettura credito...');
-                // Authenticate Sector 6 (Block 24) and read
-                const data = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: CREDIT_TREA_BLOCK, keyType: 0x61, key: card.key6 }));
+                const data = new Uint8Array(await ultra.cmdMf1ReadBlock({ 
+                    block: CREDIT_TREA_BLOCK, 
+                    keyType: 0x61, 
+                    key: card.key6,
+                    uid: uid
+                }));
                 logHex('Dati Blocco 24', data);
                 
                 const credit = (data[0] * 10 + data[1]) * 100;
@@ -1614,7 +1983,7 @@
                 
                 log(`Carta riconosciuta: ${card.name}`);
                 log('Autenticazione Settore 0...');
-                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0, uid: uid });
                 
                 log('Scrittura ricarica (55€)...');
                 const rechargeData = Buffer.alloc(16, 0);
@@ -1625,7 +1994,8 @@
                     block: CREDIT_TREA_BLOCK, 
                     keyType: 0x61, 
                     key: card.key6, 
-                    data: rechargeData 
+                    data: rechargeData,
+                    uid: uid
                 });
                 
                 log('Ricarica effettuata con successo!', 'info');
@@ -1645,7 +2015,7 @@
                 
                 log(`Carta riconosciuta: ${card.name}`);
                 log('Autenticazione Settore 0...');
-                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0 });
+                await ultra.cmdMf1ReadBlock({ block: 3, keyType: 0x61, key: TREA_KEY_S0, uid: uid });
                 
                 log('Azzeramento credito...');
                 const zeroData = Buffer.alloc(16, 0);
@@ -1654,7 +2024,8 @@
                     block: CREDIT_TREA_BLOCK, 
                     keyType: 0x61, 
                     key: card.key6, 
-                    data: zeroData 
+                    data: zeroData,
+                    uid: uid
                 });
                 
                 log('Credito azzerato con successo!', 'info');
@@ -1664,7 +2035,7 @@
             }
         };
 
-        // --- AGGIUNTA CARTE ---
+        // --- AGGIUNTA CARTE COMESTERO E TREA ---
         document.getElementById('btn-add-comestero-card').onclick = () => {
             const name = document.getElementById('new-comestero-name').value.trim();
             const uidStr = document.getElementById('new-comestero-uid').value.trim();
@@ -1734,8 +2105,18 @@
                 logHex('KeyB Autenticazione', keyB);
 
                 log('Lettura dati settore 2...');
-                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 8, keyType: 0x61, key: keyB }));
-                const block9 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 9, keyType: 0x61, key: keyB }));
+                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: 8, 
+                    keyType: 0x61, 
+                    key: keyB,
+                    uid: uid
+                }));
+                const block9 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: 9, 
+                    keyType: 0x61, 
+                    key: keyB,
+                    uid: uid
+                }));
                 
                 const credit = (block8[1] << 8) | block8[0];
                 const prevCredit = (block9[1] << 8) | block9[0];
@@ -1760,7 +2141,12 @@
 
                 const keyB = Buffer.from(card.keyUid);
                 log('Lettura credito attuale...');
-                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 8, keyType: 0x61, key: keyB }));
+                const block8 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: 8, 
+                    keyType: 0x61, 
+                    key: keyB,
+                    uid: uid
+                }));
                 const prevData = Buffer.from(block8);
 
                 let credit = (block8[1] << 8) | block8[0];
@@ -1774,13 +2160,13 @@
                 block8[9] = block8[1];
 
                 log(`Scrittura nuovo credito: ${(credit/100).toFixed(2)}€`);
-                await ultra.cmdMf1WriteBlock({ block: 8, keyType: 0x61, key: keyB, data: block8 });
-                await ultra.cmdMf1WriteBlock({ block: 9, keyType: 0x61, key: keyB, data: prevData });
+                await ultra.cmdMf1WriteBlock({ block: 8, keyType: 0x61, key: keyB, data: block8, uid: uid });
+                await ultra.cmdMf1WriteBlock({ block: 9, keyType: 0x61, key: keyB, data: prevData, uid: uid });
 
                 log('Scrittura blocco 1 settore 0...');
                 const key0 = Buffer.from(card.key0);
                 const dataBlock1 = Buffer.from([0x0F, 0x00, 0x26, 0x88, 0x26, 0x88, 0x26, 0x88, 0x26, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-                await ultra.cmdMf1WriteBlock({ block: 1, keyType: 0x61, key: key0, data: dataBlock1 });
+                await ultra.cmdMf1WriteBlock({ block: 1, keyType: 0x61, key: key0, data: dataBlock1, uid: uid });
 
                 log('Ricarica Comestero completata!');
                 showToast('Ricarica effettuata!');
@@ -1798,7 +2184,6 @@
                 const key0 = Buffer.from(card.key0);
                 const allKeysB = [key0];
                 
-                // Genera tutte le chiavi B
                 for (let i = 0; i < 15; i++) {
                     allKeysB.push(calculateKeyComestero(allKeysB[i], i === 0 ? 1 : i + 1, 'B'));
                 }
@@ -1813,7 +2198,13 @@
                     const sector = Math.floor(block / 4);
                     const key = allKeysB[sector];
                     
-                    await ultra.cmdMf1WriteBlock({ block: block, keyType: 0x61, key: key, data: block === 1 ? block1Data : emptyData });
+                    await ultra.cmdMf1WriteBlock({ 
+                        block: block, 
+                        keyType: 0x61, 
+                        key: key, 
+                        data: block === 1 ? block1Data : emptyData,
+                        uid: uid
+                    });
                     log(`Blocco ${block} resettato.`);
                 }
 
@@ -1834,11 +2225,22 @@
                 const keySector1 = calculateKeyComestero(key0, 1, 'B');
                 
                 log('Lettura blocco 5...');
-                const block5 = Buffer.from(await ultra.cmdMf1ReadBlock({ block: 5, keyType: 0x61, key: keySector1 }));
+                const block5 = Buffer.from(await ultra.cmdMf1ReadBlock({ 
+                    block: 5, 
+                    keyType: 0x61, 
+                    key: keySector1,
+                    uid: uid
+                }));
                 const newData = processGodModeData(block5, activate);
                 
                 log(activate ? 'Attivazione God Mode...' : 'Disattivazione God Mode...');
-                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x61, key: keySector1, data: newData });
+                await ultra.cmdMf1WriteBlock({ 
+                    block: 5, 
+                    keyType: 0x61, 
+                    key: keySector1, 
+                    data: newData,
+                    uid: uid
+                });
                 
                 log(`God Mode ${activate ? 'Attivata' : 'Tolta'}!`);
                 showToast(`God Mode ${activate ? 'Attiva' : 'Disattivata'}`);
@@ -1850,77 +2252,357 @@
         document.getElementById('btn-god-activate').onclick = () => handleGodMode(true);
         document.getElementById('btn-god-deactivate').onclick = () => handleGodMode(false);
 
-        // 2. RICARICA
-        document.getElementById('btn-recharge').onclick = async () => {
-            try {
-                const uid = await readTagUID();
-                const keyA = generaKeyA(uid);
-                
-                log('Lettura credito attuale...');
-                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
-                const creditoAttuale = leggiCredito(block4);
-                
-                const nuovoCredito = creditoAttuale + (selectedAmount * 100);
-                log(`Credito attuale: ${creditoAttuale/100}€ -> Nuovo: ${nuovoCredito/100}€`);
-                
-                const nuovoBlock4 = Buffer.from(block4);
-                aggiornaCredito(nuovoBlock4, nuovoCredito);
-                
-                // Per Microel, il blocco 5 spesso contiene il credito precedente
-                const nuovoBlock5 = Buffer.from(block4); // Copia vecchio credito in blocco 5
-                
-                log('Scrittura nuovi dati...');
-                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4 });
-                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock5 });
-                
-                log('Verifica...', 'info');
-                const verify = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
-                if (leggiCredito(verify) === nuovoCredito) {
-                    showToast(`Ricarica di ${selectedAmount}€ effettuata!`);
-                    log('Ricarica completata con successo!');
-                } else {
-                    throw new Error('Verifica fallita dopo scrittura');
-                }
-            } catch (e) {
-                log(`Errore ricarica: ${e.message}`, 'error');
-            }
-        };
-
-        // 3. RESET
-        document.getElementById('btn-reset').onclick = async () => {
-            if (!confirm('Sei sicuro di voler azzerare il credito?')) return;
-
-            try {
-                const uid = await readTagUID();
-                const keyA = generaKeyA(uid);
-                
-                log('Lettura blocco 4...');
-                const block4 = new Uint8Array(await ultra.cmdMf1ReadBlock({ block: 4, keyType: 0x60, key: keyA }));
-                
-                log('Azzeramento credito...');
-                const nuovoBlock4 = Buffer.from(block4);
-                aggiornaCredito(nuovoBlock4, 0);
-                
-                await ultra.cmdMf1WriteBlock({ block: 4, keyType: 0x60, key: keyA, data: nuovoBlock4 });
-                await ultra.cmdMf1WriteBlock({ block: 5, keyType: 0x60, key: keyA, data: nuovoBlock4 });
-                
-                showToast('Credito azzerato!');
-                log('Reset completato.');
-            } catch (e) {
-                log(`Errore reset: ${e.message}`, 'error');
-            }
-        };
-
         btnCancelOp.onclick = () => {
-            // There isn't a direct "cancel" for the reader command in the SDK easily exposed without closing connection
-            // but we can hide the UI. The command will eventually timeout.
             hideOverlay();
             log('Operazione annullata dall\'utente (il dispositivo rimarrà in ascolto fino al timeout).', 'warn');
         };
 
+        // --- TOOLKIT: ARCHIVIO CHIAVI, DUMP, WIPE ---
+        let keyArchive = JSON.parse(localStorage.getItem('keyArchive') || '[]');
+
+        function saveKeyArchive() {
+            localStorage.setItem('keyArchive', JSON.stringify(keyArchive));
+            renderKeyList();
+        }
+
+        function renderKeyList() {
+            const listEl = document.getElementById('key-archive-list');
+            if (!listEl) return;
+            if (keyArchive.length === 0) {
+                listEl.innerHTML = '<div style="color:var(--text-secondary); text-align:center;">Nessuna chiave salvata</div>';
+                return;
+            }
+            listEl.innerHTML = '<div style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 0.5rem;">CHIAVI SALVATE:</div>';
+            keyArchive.forEach((key, index) => {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.fontSize = '0.8rem';
+                div.style.marginBottom = '0.5rem';
+                div.style.padding = '0.3rem';
+                div.style.background = 'rgba(255,255,255,0.02)';
+                div.style.borderRadius = '4px';
+                div.innerHTML = `
+                    <div style="flex:1;">
+                        <strong>${key.name || `Settore ${key.sector}`}</strong> (Settore ${key.sector})<br>
+                        <span style="font-family:monospace; font-size:0.7rem;">KeyA: ${key.keyA} KeyB: ${key.keyB}</span>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.6rem;" onclick="deleteKey(${index})">ELIMINA</button>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        window.deleteKey = function(index) {
+            keyArchive.splice(index, 1);
+            saveKeyArchive();
+            showToast('Chiave eliminata');
+        };
+
+        document.getElementById('btn-import-bulk')?.addEventListener('click', () => {
+            const text = document.getElementById('key-bulk-input').value.trim();
+            if (!text) {
+                alert('Incolla prima un elenco di chiavi.');
+                return;
+            }
+
+            const lines = text.split('\n');
+            let imported = 0;
+            let errors = [];
+
+            lines.forEach((line, lineNum) => {
+                line = line.trim();
+                if (line === '' || line.startsWith('#')) return;
+
+                const parts = line.split(/\s+/);
+                if (parts.length < 3) {
+                    errors.push(`Riga ${lineNum+1}: formato non valido (mancano campi)`);
+                    return;
+                }
+
+                const sector = parseInt(parts[0], 10);
+                if (isNaN(sector) || sector < 0 || sector > 15) {
+                    errors.push(`Riga ${lineNum+1}: settore non valido (0-15)`);
+                    return;
+                }
+
+                const keyA = parts[1].toUpperCase().replace(/[^0-9A-F]/g, '');
+                const keyB = parts[2].toUpperCase().replace(/[^0-9A-F]/g, '');
+
+                if (keyA.length !== 12 || keyB.length !== 12) {
+                    errors.push(`Riga ${lineNum+1}: chiavi devono essere 12 caratteri hex (senza spazi)`);
+                    return;
+                }
+
+                const existingIndex = keyArchive.findIndex(k => k.sector === sector);
+                const newEntry = {
+                    name: `Settore ${sector}`,
+                    sector: sector,
+                    keyA: keyA,
+                    keyB: keyB
+                };
+
+                if (existingIndex >= 0) {
+                    keyArchive[existingIndex] = newEntry;
+                } else {
+                    keyArchive.push(newEntry);
+                }
+                imported++;
+            });
+
+            if (imported > 0) {
+                saveKeyArchive();
+                showToast(`${imported} settori importati/aggiornati.`);
+            }
+
+            if (errors.length > 0) {
+                alert('Errori rilevati:\n' + errors.join('\n'));
+            }
+
+            document.getElementById('key-bulk-input').value = '';
+        });
+
+        document.getElementById('btn-clear-archive')?.addEventListener('click', () => {
+            if (confirm('Sei sicuro di voler cancellare TUTTE le chiavi salvate?')) {
+                keyArchive = [];
+                saveKeyArchive();
+                showToast('Archivio chiavi svuotato.');
+            }
+        });
+
+        document.getElementById('btn-add-key')?.addEventListener('click', () => {
+            const name = document.getElementById('key-name').value.trim();
+            const sector = parseInt(document.getElementById('key-sector').value);
+            const keyA = document.getElementById('key-a').value.trim().toUpperCase();
+            const keyB = document.getElementById('key-b').value.trim().toUpperCase();
+
+            if (!name || isNaN(sector) || sector < 0 || sector > 15 || keyA.length !== 12 || keyB.length !== 12) {
+                alert('Dati non validi. Assicurati che: nome, settore 0-15, chiavi 12 caratteri hex.');
+                return;
+            }
+
+            keyArchive.push({ name, sector, keyA, keyB });
+            saveKeyArchive();
+            showToast('Chiave aggiunta');
+            document.getElementById('key-name').value = '';
+            document.getElementById('key-sector').value = '';
+            document.getElementById('key-a').value = '';
+            document.getElementById('key-b').value = '';
+        });
+
+        function findKeyForSector(sector) {
+            const entry = keyArchive.find(k => k.sector === sector);
+            if (entry) {
+                return {
+                    keyA: Buffer.from(hexToBytes(entry.keyA)),
+                    keyB: Buffer.from(hexToBytes(entry.keyB))
+                };
+            }
+            return null;
+        }
+
+        document.getElementById('btn-export-dump')?.addEventListener('click', async () => {
+            try {
+                const uid = await readTagUID();
+                log('Esportazione dump avviata...');
+                showOverlay('Lettura dump', 'Leggendo blocchi 0-63...');
+
+                const dump = Buffer.alloc(1024);
+                let successCount = 0;
+
+                for (let sector = 0; sector < 16; sector++) {
+                    const firstBlock = sector * 4;
+                    const keys = findKeyForSector(sector) || {
+                        keyA: Buffer.alloc(6, 0xFF),
+                        keyB: Buffer.alloc(6, 0xFF)
+                    };
+
+                    let authSuccess = false;
+                    let keyUsed = null;
+                    let keyType = 0;
+                    try {
+                        await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x60, key: keys.keyA, uid });
+                        keyUsed = keys.keyA;
+                        keyType = 0x60;
+                        authSuccess = true;
+                    } catch (e) {
+                        try {
+                            await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x61, key: keys.keyB, uid });
+                            keyUsed = keys.keyB;
+                            keyType = 0x61;
+                            authSuccess = true;
+                        } catch (e2) {
+                            log(`Settore ${sector}: autenticazione fallita, salto...`, 'warn');
+                        }
+                    }
+
+                    if (!authSuccess) continue;
+
+                    for (let b = 0; b < 4; b++) {
+                        const blockNum = firstBlock + b;
+                        await new Promise(r => setTimeout(r, 100));
+                        const data = Buffer.from(await ultra.cmdMf1ReadBlock({ block: blockNum, keyType, key: keyUsed, uid }));
+                        data.copy(dump, blockNum * 16);
+                        successCount++;
+                    }
+                }
+
+                hideOverlay();
+                const blob = new Blob([dump], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dump_${uid.toString('hex').toUpperCase()}.bin`;
+                a.click();
+                URL.revokeObjectURL(url);
+                log(`Dump esportato (${successCount} blocchi letti)`, 'info');
+                showToast('Dump salvato!');
+            } catch (e) {
+                hideOverlay();
+                log(`Errore export: ${e.message}`, 'error');
+            }
+        });
+
+        document.getElementById('dump-file')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                log(`File selezionato: ${file.name} (${file.size} byte)`, 'info');
+            }
+        });
+
+        document.getElementById('btn-write-dump')?.addEventListener('click', async () => {
+            const fileInput = document.getElementById('dump-file');
+            if (!fileInput.files.length) {
+                alert('Seleziona prima un file .bin');
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const dump = Buffer.from(e.target.result);
+                    if (dump.length !== 1024) {
+                        throw new Error('Il file deve essere esattamente 1024 byte (64 blocchi x 16)');
+                    }
+
+                    const uid = await readTagUID();
+                    log('Scrittura dump avviata...');
+                    showOverlay('Scrittura dump', 'Scrivendo blocchi...');
+                    const progressEl = document.getElementById('dump-progress');
+                    let written = 0;
+
+                    for (let sector = 0; sector < 16; sector++) {
+                        const firstBlock = sector * 4;
+                        const keys = findKeyForSector(sector) || {
+                            keyA: Buffer.alloc(6, 0xFF),
+                            keyB: Buffer.alloc(6, 0xFF)
+                        };
+
+                        let authSuccess = false;
+                        let keyUsed = null;
+                        let keyType = 0;
+                        try {
+                            await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x60, key: keys.keyA, uid });
+                            keyUsed = keys.keyA;
+                            keyType = 0x60;
+                            authSuccess = true;
+                        } catch (e) {
+                            try {
+                                await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x61, key: keys.keyB, uid });
+                                keyUsed = keys.keyB;
+                                keyType = 0x61;
+                                authSuccess = true;
+                            } catch (e2) {
+                                log(`Settore ${sector}: autenticazione fallita, salto...`, 'warn');
+                            }
+                        }
+
+                        if (!authSuccess) continue;
+
+                        for (let b = 0; b < 4; b++) {
+                            const blockNum = firstBlock + b;
+                            const blockData = dump.slice(blockNum * 16, blockNum * 16 + 16);
+                            await new Promise(r => setTimeout(r, 150));
+                            await ultra.cmdMf1WriteBlock({ block: blockNum, keyType, key: keyUsed, data: blockData, uid });
+                            written++;
+                            if (progressEl) progressEl.innerHTML = `Scritti ${written}/64 blocchi...`;
+                        }
+                    }
+
+                    hideOverlay();
+                    log(`Dump scritto (${written} blocchi)`, 'info');
+                    showToast('Dump scritto!');
+                } catch (e) {
+                    hideOverlay();
+                    log(`Errore scrittura dump: ${e.message}`, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('btn-wipe-card')?.addEventListener('click', async () => {
+            if (!confirm('Sei sicuro di voler riportare la carta allo stato di fabbrica? Tutti i dati andranno persi.')) return;
+
+            try {
+                const uid = await readTagUID();
+                log('Inverginatura carta...');
+                showOverlay('Inverginatura', 'Scrittura blocchi di fabbrica...');
+                const progressEl = document.getElementById('dump-progress');
+
+                const defaultKey = Buffer.alloc(6, 0xFF);
+                const trailerDefault = Buffer.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x07, 0x80, 0x69, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]);
+                const dataBlockDefault = Buffer.alloc(16, 0);
+
+                for (let sector = 0; sector < 16; sector++) {
+                    const firstBlock = sector * 4;
+                    let authSuccess = false;
+                    let keyUsed = null;
+                    let keyType = 0;
+                    try {
+                        await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x60, key: defaultKey, uid });
+                        keyUsed = defaultKey;
+                        keyType = 0x60;
+                        authSuccess = true;
+                    } catch (e) {
+                        try {
+                            await ultra.cmdMf1ReadBlock({ block: firstBlock, keyType: 0x61, key: defaultKey, uid });
+                            keyUsed = defaultKey;
+                            keyType = 0x61;
+                            authSuccess = true;
+                        } catch (e2) { }
+                    }
+
+                    if (!authSuccess) {
+                        log(`Settore ${sector}: impossibile autenticare con chiave default, salto...`, 'warn');
+                        continue;
+                    }
+
+                    for (let b = 0; b < 3; b++) {
+                        const blockNum = firstBlock + b;
+                        await new Promise(r => setTimeout(r, 150));
+                        await ultra.cmdMf1WriteBlock({ block: blockNum, keyType, key: keyUsed, data: dataBlockDefault, uid });
+                        if (progressEl) progressEl.innerHTML = `Settore ${sector}, blocco ${b}...`;
+                    }
+                    await new Promise(r => setTimeout(r, 150));
+                    await ultra.cmdMf1WriteBlock({ block: firstBlock + 3, keyType, key: keyUsed, data: trailerDefault, uid });
+                }
+
+                hideOverlay();
+                log('Carta inverginata con successo!', 'info');
+                showToast('Carta ripristinata');
+            } catch (e) {
+                hideOverlay();
+                log(`Errore inverginatura: ${e.message}`, 'error');
+            }
+        });
+
+        renderKeyList();
+
         // Inizializzazione liste carte utente
         renderUserCardLists();
-
     </script>
 </body>
 </html>

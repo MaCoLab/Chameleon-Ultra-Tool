@@ -1,20 +1,100 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AVVISO IMPORTANTE (INFORMATIVA)
 
-# Run and deploy your AI Studio app
+## Questo strumento è fornito ESCLUSIVAMENTE A SCOPO INFORMATIVO ED EDUCATIVO.
 
-This contains everything you need to run your app locally.
+Il progetto è stato sviluppato per:
 
-View your app in AI Studio: https://ai.studio/apps/efd57e82-667a-41f5-982c-b487dbb0608a
+Approfondire la conoscenza dei sistemi di sicurezza delle smartcard Mifare Classic
 
-## Run Locally
+Supportare attività di ricerca e studio nel campo della sicurezza informatica
 
-**Prerequisites:**  Node.js
+Assistere tecnici autorizzati nel recupero di chiavi smarrite su sistemi di proprietà
 
+## LIMITAZIONE DI RESPONSABILITÀ
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Il creatore, lo sviluppatore e il proprietario di questo progetto NON SI ASSUMONO ALCUNA RESPONSABILITÀ per:
+
+L'uso illecito delle chiavi generate, inclusi ma non limitati a:
+
+Duplicazione non autorizzata di carte
+
+Accesso a sistemi protetti senza consenso
+
+Manomissione di dispositivi altrui
+
+Frodi o attività criminali
+
+Danni diretti o indiretti derivanti dall'utilizzo di questo strumento
+
+La violazione di termini di servizio di terze parti
+
+## REQUISITI PER L'UTILIZZO
+
+L'utente si impegna a:
+
+- Utilizzare questo strumento SOLO su carte e sistemi di propria proprietà
+
+- Rispettare tutte le leggi applicabili in materia di accesso ai sistemi informatici
+
+- Non violare la privacy altrui
+
+- Non tentare di eludere sistemi di sicurezza senza esplicita autorizzazione
+
+## NATURA EDUCATIVA
+
+Le informazioni fornite sono il risultato di attività di reverse engineering a scopo didattico. Questo progetto non incoraggia né supporta attività illegali.
+
+VIOLAZIONI
+
+Qualsiasi utilizzo improprio dello strumento è di esclusiva responsabilità dell'utente. Gli autori declinano ogni responsabilità e invitano all'uso etico e legale di questo software.
+
+## 🇬🇧 ENGLISH
+## IMPORTANT NOTICE
+
+This webapp and key calculation tool is provided EXCLUSIVELY FOR INFORMATIONAL AND EDUCATIONAL PURPOSES.
+
+The project was developed to:
+
+Deepen knowledge of Mifare Classic smartcard security systems
+
+Support research and study activities in the field of information security
+
+Assist authorized technicians in recovering lost keys on owned systems
+
+## LIMITATION OF LIABILITY
+
+The creator, developer, and owner of this project ASSUME NO RESPONSIBILITY for:
+
+Illegal use of generated keys, including but not limited to:
+
+Unauthorized card duplication
+
+Access to protected systems without consent
+
+Tampering with others' devices
+
+Fraud or criminal activities
+
+Direct or indirect damages resulting from the use of this tool
+
+Violation of third-party terms of service
+
+## REQUIREMENTS FOR USE
+
+The user agrees to:
+
+- Use this tool ONLY on cards and systems you own
+
+- Comply with all applicable laws regarding computer system access
+
+- Not violate others' privacy
+
+- Not attempt to bypass security systems without explicit authorization
+
+## EDUCATIONAL NATURE
+
+The information provided is the result of reverse engineering activities for educational purposes. This project does not encourage or support illegal activities.
+
+## VIOLATIONS
+
+Any improper use of the tool is the sole responsibility of the user. The authors disclaim all liability and encourage ethical and legal use of this software.
